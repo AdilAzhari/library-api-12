@@ -1,66 +1,231 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Library API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A robust Laravel-based API for managing a library system. This project includes features like **GraphQL**, **Event Sourcing**, **Multi-Language Support**, and more.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Table of Contents
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. [Features](#features)
+2. [Installation](#installation)
+3. [API Endpoints](#api-endpoints)
+4. [GraphQL](#graphql)
+5. [Event Sourcing](#event-sourcing)
+6. [Multi-Language Support](#multi-language-support)
+7. [Testing](#testing)
+8. [Contributing](#contributing)
+9. [License](#license)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **REST API**: Manage books with CRUD operations.
+- **GraphQL**: Flexible querying for books and related data.
+- **Event Sourcing**: Track changes to books using events.
+- **Multi-Language Support**: Supports English and Arabic with automatic translation.
+- **Export Data**: Export books to Excel.
+- **Google Books Integration**: Fetch book data from Google Books API.
+- **Recommendations**: Get book recommendations based on genre.
+- **Health Check**: A simple endpoint to check API health.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installation
 
-## Laravel Sponsors
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/your-username/library-api.git
+   cd library-api
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install Dependencies**:
+   ```bash
+   composer install
+   ```
 
-### Premium Partners
+3. **Set Up Environment**:
+   - Copy `.env.example` to `.env`:
+     ```bash
+     cp .env.example .env
+     ```
+   - Generate an application key:
+     ```bash
+     php artisan key:generate
+     ```
+   - Configure your database in `.env`:
+     ```env
+     DB_CONNECTION=mysql
+     DB_HOST=127.0.0.1
+     DB_PORT=3306
+     DB_DATABASE=library
+     DB_USERNAME=root
+     DB_PASSWORD=
+     ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. **Run Migrations**:
+   ```bash
+   php artisan migrate
+   ```
+
+5. **Seed the Database (Optional)**:
+   ```bash
+   php artisan db:seed
+   ```
+
+6. **Start the Development Server**:
+   ```bash
+   php artisan serve
+   ```
+
+---
+
+## API Endpoints
+
+### REST API
+
+| Method   | URI                              | Description                     |
+|----------|----------------------------------|---------------------------------|
+| GET      | `/api/v1/books`                  | List all books                  |
+| POST     | `/api/v1/books`                  | Create a new book               |
+| GET      | `/api/v1/books/{book}`           | Get a single book               |
+| PUT      | `/api/v1/books/{book}`           | Update a book                   |
+| DELETE   | `/api/v1/books/{book}`           | Delete a book                   |
+| POST     | `/api/v1/books/{id}/restore`     | Restore a deleted book          |
+| GET      | `/api/v1/books/export`           | Export books to Excel           |
+| GET      | `/api/v1/books/fetch-from-google`| Fetch books from Google Books   |
+| GET      | `/api/v1/books/{book}/recommend` | Get book recommendations        |
+| GET      | `/api/v1/health`                 | Health check endpoint           |
+
+---
+
+## GraphQL
+
+The API supports GraphQL for flexible querying. Use the `/graphql` endpoint to interact with the GraphQL API.
+
+### Example Queries
+
+1. **Get All Books**:
+   ```graphql
+   query {
+       books {
+           id
+           title
+           author
+       }
+   }
+   ```
+
+2. **Get a Single Book**:
+   ```graphql
+   query {
+       book(id: 1) {
+           id
+           title
+           author
+       }
+   }
+   ```
+
+3. **Create a Book**:
+   ```graphql
+   mutation {
+       createBook(input: {
+           title: "Laravel API",
+           author: "John Doe",
+           publication_year: 2024,
+           description: "A book about Laravel APIs."
+       }) {
+           id
+           title
+       }
+   }
+   ```
+
+---
+
+## Event Sourcing
+
+The API uses Event Sourcing to track changes to books. All changes are stored as events, and the current state is rebuilt by replaying these events.
+
+### Example Events
+
+- **BookCreated**: Emitted when a new book is created.
+- **BookUpdated**: Emitted when a book is updated.
+- **BookDeleted**: Emitted when a book is deleted.
+
+### Example Usage
+
+```php
+$bookAggregate = BookAggregate::retrieve($uuid);
+$bookAggregate->createBook([
+    'title' => 'Laravel API',
+    'author' => 'John Doe',
+])->persist();
+```
+
+---
+
+## Multi-Language Support
+
+The API supports English and Arabic. Translations are stored in the `lang` directory.
+
+### Example Translations
+
+1. **English** (`lang/en/messages.php`):
+   ```php
+   return [
+       'welcome' => 'Welcome to our application!',
+       'book' => 'Book',
+   ];
+   ```
+
+2. **Arabic** (`lang/ar/messages.php`):
+   ```php
+   return [
+       'welcome' => 'مرحبًا بكم في تطبيقنا!',
+       'book' => 'كتاب',
+   ];
+   ```
+
+### Automatic Translation
+
+The API integrates with **Google Translate** for automatic translation between English and Arabic.
+
+```php
+use Stichoza\GoogleTranslate\GoogleTranslate;
+
+$translator = new GoogleTranslate();
+$translator->setSource('en')->setTarget('ar');
+
+$translatedText = $translator->translate('Welcome to our application!');
+echo $translatedText; // Outputs "مرحبًا بكم في تطبيقنا!"
+```
+
+---
+
+## Testing
+
+Run the tests using Pest:
+
+```bash
+php artisan test
+```
+
+---
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/YourFeature`).
+3. Commit your changes (`git commit -m 'Add some feature'`).
+4. Push to the branch (`git push origin feature/YourFeature`).
+5. Open a pull request.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-source and available under the [MIT License](LICENSE).
+
+---
