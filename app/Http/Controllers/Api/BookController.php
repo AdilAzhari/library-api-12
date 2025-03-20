@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Aggregates\BookAggregate;
 use App\DTO\BookCreateDTO;
 use App\DTO\BookUpdateDTO;
 use App\Http\Controllers\Controller;
@@ -9,18 +10,26 @@ use App\Models\Book;
 use App\Services\BookService;
 use App\Services\GoogleBooksService;
 use App\Services\BookExportService;
+use App\Services\TranslationService;
+use App\Traits\ApiMessages;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Stichoza\GoogleTranslate\Exceptions\LargeTextException;
+use Stichoza\GoogleTranslate\Exceptions\RateLimitException;
+use Stichoza\GoogleTranslate\Exceptions\TranslationRequestException;
 
 class BookController extends Controller
 {
+    use ApiMessages;
+
     public function __construct(
         protected BookService        $bookService,
         protected GoogleBooksService $googleBooksService,
-        protected BookExportService  $bookExportService
+        protected BookExportService  $bookExportService,
+        protected TranslationService $translationService
     )
     {
     }
@@ -39,7 +48,7 @@ class BookController extends Controller
             return $this->bookService->getAllBooks($request->all(), $request->input('per_page', 10));
         });
 
-        return response()->json($books);
+        return $this->successResponse('Books retrieved successfully', $books);
     }
 
     public function store(Request $request)
@@ -50,6 +59,7 @@ class BookController extends Controller
             'description' => 'nullable|string',
             'publication_year' => 'required|digits:4|integer|min:1900|max:' . now()->format('Y'),
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'genre_id' => 'required|integer|exists:genres,id',
         ], [
             'title.unique' => 'A book with this title and author already exists.',
             'publication_year.max' => 'The publication year cannot be in the future.',
@@ -57,19 +67,30 @@ class BookController extends Controller
 
         try {
             $dto = BookCreateDTO::fromRequest($request);
-            $book = $this->bookService->createBook($dto);
+            $bookAggregate = BookAggregate::retrieve($request->input('id') ?? uniqid());
+            $bookAggregate->createBook($dto)->persist();
 
-            dd('here');
-            return response()->json($book, 201);
+            return $this->successResponse('Book created successfully', [], 201);
         } catch (Exception $e) {
             Log::error('Error creating book: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while creating the book.'], 500);
+            return $this->serverErrorResponse('An error occurred while creating the book.');
         }
     }
 
-    public function show(Book $book)
+    /**
+     * @throws LargeTextException
+     * @throws RateLimitException
+     * @throws TranslationRequestException
+     */
+    public function show(Request $request, Book $book)
     {
-        return response()->json($book);
+        $locale = $request->header('Accept-Language', 'en');
+
+        if ($locale !== 'en') {
+            $book->title = $this->translationService->translate($book->title, $locale);
+            $book->description = $this->translationService->translate($book->description, $locale);
+        }
+        return $this->successResponse('Book retrieved successfully', $book);
     }
 
     public function update(Request $request, Book $book)
@@ -82,21 +103,36 @@ class BookController extends Controller
             'cover_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048|nullable',
             'genre_id' => 'required|integer|exists:genres,id|nullable',
         ]);
-        $dto = BookUpdateDTO::fromRequest($request);
-        $book = $this->bookService->updateBook($book, $dto);
-        return response()->json($book);
+
+        try {
+            $dto = BookUpdateDTO::fromRequest($request);
+            $bookAggregate = BookAggregate::retrieve($book->id);
+            $bookAggregate->updateBook($dto)->persist();
+
+            return $this->successResponse('Book updated successfully');
+        } catch (Exception $e) {
+            Log::error('Error updating book: ' . $e->getMessage());
+            return $this->serverErrorResponse('An error occurred while updating the book.');
+        }
     }
 
     public function destroy(Book $book)
     {
-        $this->bookService->deleteBook($book);
-        return response()->json(['message' => 'Book moved to trash']);
+        try {
+            $bookAggregate = BookAggregate::retrieve($book->id);
+            $bookAggregate->deleteBook($book)->persist();
+
+            return $this->successResponse('Book moved to trash');
+        } catch (Exception $e) {
+            Log::error('Error deleting book: ' . $e->getMessage());
+            return $this->serverErrorResponse('An error occurred while deleting the book.');
+        }
     }
 
     public function restore($id)
     {
         $book = $this->bookService->restoreBook($id);
-        return response()->json(['message' => 'Book restored successfully']);
+        return $this->successResponse('Book restored successfully');
     }
 
     public function export()
@@ -107,17 +143,17 @@ class BookController extends Controller
     public function fetchFromGoogleBooks(Request $request)
     {
         $results = $this->googleBooksService->searchBooks($request->input('query'));
-        return response()->json($results);
+        return $this->successResponse('Books fetched from Google Books', $results);
     }
 
     public function recommend(Book $book)
     {
         $relatedBooks = $this->bookService->recommendBooks($book);
-        return response()->json($relatedBooks);
+        return $this->successResponse('Recommended books retrieved successfully', $relatedBooks);
     }
 
     public function health()
     {
-        return response()->json(['status' => 'ok']);
+        return $this->successResponse('API is healthy', ['status' => 'ok']);
     }
 }

@@ -6,7 +6,6 @@ use App\DTO\BookCreateDTO;
 use App\DTO\BookUpdateDTO;
 use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 

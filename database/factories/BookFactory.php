@@ -30,6 +30,8 @@ class BookFactory extends Factory
                 'status' => 1,
                 'description' => $this->faker->paragraph(),
             ]),
+            'average_rating' => $this->faker->numberBetween(1,5),
+            'is_borrowed' => $this->faker->randomElement([0,1]),
         ];
     }
 }

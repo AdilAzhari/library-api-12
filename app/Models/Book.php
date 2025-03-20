@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Observers\BookObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,6 +21,8 @@ class Book extends Model
         'publication_year',
         'genre_id',
         'cover_image',
+        'is_borrowed',
+        'average_rating',
     ];
     public function books(): HasMany
     {
@@ -37,5 +40,15 @@ class Book extends Model
             'author' => $this->author,
             'description' => $this->description,
         ];
+    }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }

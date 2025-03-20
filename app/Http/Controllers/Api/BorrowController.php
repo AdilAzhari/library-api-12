@@ -2,23 +2,56 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\BorrowBookDTO;
+use App\DTO\ReturnBookDTO;
 use App\Http\Controllers\Controller;
-use App\Models\Book;
+use App\Services\BorrowingService;
+use App\Traits\ApiMessages;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BorrowController extends Controller
 {
-    public function borrowBook(Request $request, Book $book)
+    use ApiMessages;
+
+    public function __construct(protected BorrowingService $borrowingService)
     {
-        $request->validate(['user_id' => 'required|exists:users,id']);
-
-        if ($book->borrows()->whereNull('returned_at')->exists()) {
-            return response()->json(['message' => 'Book is already borrowed'], 400);
-        }
-
-        $book->borrows()->create(['user_id' => $request->user_id, 'borrowed_at' => now()]);
-
-        return response()->json(['message' => 'Book borrowed successfully'], 201);
     }
 
+    public function borrowBook(Request $request)
+    {
+        try {
+            $dto = new BorrowBookDTO(
+                $request->input('book_id'),
+                $request->input('user_id'),
+                borrowed_at: $request->input('borrowed_at'),
+                returned_at: $request->input('returned_at')
+            );
+
+            $borrowing = $this->borrowingService->borrowBook($dto);
+
+            return $this->successResponse('Book borrowed successfully', $borrowing, 201);
+        } catch (Exception $e) {
+            Log::error('Error borrowing book: ' . $e->getMessage());
+            return $this->serverErrorResponse('An error occurred while borrowing the book.');
+        }
+    }
+
+    public function returnBook(Request $request)
+    {
+        try {
+            $dto = new ReturnBookDTO(
+                bookId: $request->input('book_id'),
+                userId: $request->input('user_id'),
+            );
+
+            $borrowing = $this->borrowingService->returnBook($dto);
+
+            return $this->successResponse('Book returned successfully', $borrowing);
+        } catch (Exception $e) {
+            Log::error('Error returning book: ' . $e->getMessage());
+            return $this->serverErrorResponse('An error occurred while returning the book.');
+        }
+    }
 }

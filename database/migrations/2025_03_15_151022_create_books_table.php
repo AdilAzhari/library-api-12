@@ -18,7 +18,9 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->year('publication_year');
             $table->foreignId('genre_id')->constrained();
+            $table->boolean('is_borrowed')->default(false);
             $table->string('cover_image')->nullable();
+            $table->decimal('average_rating', 3, 2)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
