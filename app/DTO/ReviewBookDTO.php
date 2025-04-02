@@ -9,7 +9,6 @@ class ReviewBookDTO
      */
     public function __construct(
         public int     $bookId,
-        public int     $userId,
         public int     $rating,
         public ?string $comment = null,
     )

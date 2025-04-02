@@ -2,18 +2,15 @@
 
 namespace App\DTO;
 
-readonly class ReserveBookDTO
+class ReserveBookDTO
 {
-    /**
-     * Create a new class instance.
-     */
     public function __construct(
         public int $bookId,
         public int $userId,
-        public ?string $reserved_at,
-        public ?string $fulfilled_at,
-    )
-    {
+        public ?string $reservedAt = null,
+        public ?string $expiresAt = null
+    ) {
+        $this->reservedAt = $reservedAt ?? now()->toDateTimeString();
+        $this->expiresAt = $expiresAt ?? now()->addDays(config('library.reservation_expiry_days', 7))->toDateTimeString();
     }
-
 }
