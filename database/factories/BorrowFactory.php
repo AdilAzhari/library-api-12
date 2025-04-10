@@ -19,11 +19,36 @@ class BorrowFactory extends Factory
      */
     public function definition(): array
     {
+        $book = Book::query()->inRandomOrder()->first();
+        $user = User::query()->inRandomOrder()->first();
+
         return [
-            'user_id' => User::query()->inRandomOrder()->first()->id,
-            'book_id' => Book::query()->inRandomOrder()->first()->id,
-            'borrowed_at' => $this->faker->dateTimeBetween('-2 years'),
-            'returned_at' => $this->faker->dateTimeBetween('-2 years', '-2 month'),
+            'book_id' => $book->id,
+            'user_id' => $user->id,
+            'borrowed_at' => $this->faker->dateTimeBetween('-1 month'),
+            'due_date' => $this->faker->dateTimeBetween('now', '+1 month'),
+            'returned_at' => null,
+            'created_at' => $this->faker->dateTimeBetween('-1 month'),
+            'updated_at' => $this->faker->dateTimeBetween('-1 month'),
         ];
+    }
+
+    public function returned(): Factory|BorrowFactory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'returned_at' => $this->faker->dateTimeBetween($attributes['borrowed_at'], 'now'),
+            ];
+        });
+    }
+
+    public function overdue(): Factory|BorrowFactory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'due_date' => $this->faker->dateTimeBetween('-2 weeks', '-1 day'),
+                'returned_at' => null,
+            ];
+        });
     }
 }

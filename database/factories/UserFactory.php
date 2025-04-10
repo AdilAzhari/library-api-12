@@ -3,12 +3,13 @@
 namespace Database\Factories;
 
 use App\Enum\UserRoles;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -33,7 +34,7 @@ class UserFactory extends Factory
             'role' => $this->faker->randomElement([
                 UserRoles::Admin,
                 UserRoles::librarian,
-                UserRoles::librarian,
+                UserRoles::member,
             ])
         ];
     }

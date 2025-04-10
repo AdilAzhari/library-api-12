@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,16 +12,21 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('author');
+            $table->string('title', 255);
+            $table->string('author', 255);
             $table->text('description')->nullable();
             $table->year('publication_year');
-            $table->foreignId('genre_id')->constrained();
-            $table->boolean('is_borrowed')->default(false);
+            $table->foreignId('genre_id')->constrained()->onDelete('cascade');
             $table->string('cover_image')->nullable();
-            $table->decimal('average_rating', 3, 2)->nullable();
+            $table->decimal('average_rating', 3, 2)->nullable()->default(0);
+            $table->string('ISBN', 17)->unique()->nullable();
+            $table->enum('status', ['available', 'borrowed', 'reserved'])->default('available');
             $table->softDeletes();
             $table->timestamps();
+
+            $table->index('title');
+            $table->index('author');
+            $table->index('status');
         });
     }
 

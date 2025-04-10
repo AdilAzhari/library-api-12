@@ -21,17 +21,48 @@ class BookFactory extends Factory
         return [
             'title' => $this->faker->sentence(3),
             'author' => $this->faker->name(),
-            'description' => $this->faker->paragraph(),
             'publication_year' => $this->faker->dateTimeBetween('-3 year')->format('Y'),
-            'genre_id' => Genre::factory()->create([
-                'name' => $this->faker->word(),
-                'slug' => $this->faker->slug(),
-                'image' => $this->faker->imageUrl(),
-                'status' => 1,
-                'description' => $this->faker->paragraph(),
-            ]),
-            'average_rating' => $this->faker->numberBetween(1,5),
-            'is_borrowed' => $this->faker->randomElement([0,1]),
+            'description' => $this->faker->paragraph(),
+            'genre_id' => Genre::factory(),
+            'ISBN' => $this->faker->isbn13,
+            'status' => $this->faker->randomElement(['available', 'borrowed', 'reserved']),
+            'average_rating' => $this->faker->randomFloat(1, 1, 5),
         ];
+    }
+
+    public function withCoverImage(): BookFactory|Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'cover_image' => 'covers/' . $this->faker->uuid . '.jpg',
+            ];
+        });
+    }
+
+    public function available(): BookFactory|Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'available',
+            ];
+        });
+    }
+
+    public function borrowed(): BookFactory|Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'borrowed',
+            ];
+        });
+    }
+
+    public function reserved(): BookFactory|Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => 'reserved',
+            ];
+        });
     }
 }
