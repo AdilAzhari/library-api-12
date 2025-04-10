@@ -3,8 +3,11 @@
 namespace Tests\Unit\DTO;
 
 use App\DTO\BookCreateDTO;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+
+uses(RefreshDatabase::class);
 
 it('initializes BookCreateDTO correctly', function () {
     $data = [

@@ -13,9 +13,9 @@
 //    $response->assertStatus(201);
 //});
 
-test(' test_can_get_all_books', function () {
+test('test can get all books', function () {
     $response = $this->withHeaders([
-        'Accept-Language' => 'en', // Ensure a valid locale
+        'Accept-Language' => 'en',
     ])->get('/api/v1/books');
     $response->assertStatus(200);
 });

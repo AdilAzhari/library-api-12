@@ -5,15 +5,15 @@ namespace Tests\Unit\Services;
 use App\DTO\BookCreateDTO;
 use App\DTO\BookUpdateDTO;
 use App\Models\Book;
+use App\Models\Genre;
 use App\Services\BookService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
-uses(RefreshDatabase::class);
-
 beforeEach(function () {
     $this->bookService = new BookService();
+    $this->genre = Genre::factory()->create();
 });
 
 it('creates a book', function () {
@@ -22,7 +22,7 @@ it('creates a book', function () {
         'Test Author',
         2023,
         'A test book description.',
-        1,
+        $this->genre->id,
         UploadedFile::fake()->image('cover.jpg')
     );
 
@@ -34,28 +34,32 @@ it('creates a book', function () {
         ->and($book->description)->toBe('A test book description.')
         ->and($book->genre_id)->toBe(1)
         ->and($book->cover_image)->not->toBeNull();
+
+    $this->assertDatabaseHas('books', ['title' => 'Test Book']);
 });
 
 it('updates a book', function () {
-    $book = Book::factory()->create();
+    $book = Book::factory()->create(['genre_id' => $this->genre->id]);
 
     $dto = new BookUpdateDTO(
-        'Updated Book',
+        'Updated Title',
         'Updated Author',
         2023,
         'An updated book description.',
-        1,
+        $this->genre->id,
         UploadedFile::fake()->image('updated_cover.jpg')
     );
 
     $updatedBook = $this->bookService->updateBook($book, $dto);
 
-    expect($updatedBook->title)->toBe('Updated Book')
+    expect($updatedBook->title)->toBe('Updated Title')
         ->and($updatedBook->author)->toBe('Updated Author')
         ->and($updatedBook->publication_year)->toBe(2023)
         ->and($updatedBook->description)->toBe('An updated book description.')
-        ->and($updatedBook->genre_id)->toBe(1)
+        ->and($updatedBook->genre_id)->toBe(2)
         ->and($updatedBook->cover_image)->not->toBeNull();
+
+    $this->assertDatabaseHas('books', ['title' => 'Updated Title']);
 });
 
 it('deletes a book', function () {
