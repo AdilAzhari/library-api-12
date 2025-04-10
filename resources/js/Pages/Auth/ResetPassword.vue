@@ -4,7 +4,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import {Head, useForm} from '@inertiajs/vue3';
 
 const props = defineProps({
     email: {
@@ -33,69 +33,78 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Reset Password" />
+        <Head title="Reset Password"/>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+        <div class="max-w-md w-full bg-white rounded-xl shadow-lg overflow-hidden p-8">
+            <div class="text-center mb-6">
+                <div class="flex justify-center mb-4">
+                    <div class="p-3 bg-amber-400 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#2c3e50]" fill="none"
+                             viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-[#2c3e50]">Create New Password</h2>
+                <p class="mt-2 text-gray-500">Enter your new password below.</p>
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+            <form @submit.prevent="submit" class="space-y-4">
+                <input type="hidden" v-model="form.token"/>
 
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="new-password"
-                />
+                <div>
+                    <InputLabel for="email" value="Email" class="block text-sm font-medium text-gray-700 mb-1"/>
+                    <TextInput
+                        id="email"
+                        type="email"
+                        class="mt-1 block w-full rounded-lg border-gray-300 focus:border-amber-400 focus:ring focus:ring-amber-200 transition"
+                        v-model="form.email"
+                        required
+                        autofocus
+                        autocomplete="username"
+                    />
+                    <InputError class="mt-1 text-sm text-red-600" :message="form.errors.email"/>
+                </div>
 
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
+                <div>
+                    <InputLabel for="password" value="New Password"
+                                class="block text-sm font-medium text-gray-700 mb-1"/>
+                    <TextInput
+                        id="password"
+                        type="password"
+                        class="mt-1 block w-full rounded-lg border-gray-300 focus:border-amber-400 focus:ring focus:ring-amber-200 transition"
+                        v-model="form.password"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <InputError class="mt-1 text-sm text-red-600" :message="form.errors.password"/>
+                </div>
 
-            <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
+                <div>
+                    <InputLabel for="password_confirmation" value="Confirm Password"
+                                class="block text-sm font-medium text-gray-700 mb-1"/>
+                    <TextInput
+                        id="password_confirmation"
+                        type="password"
+                        class="mt-1 block w-full rounded-lg border-gray-300 focus:border-amber-400 focus:ring focus:ring-amber-200 transition"
+                        v-model="form.password_confirmation"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <InputError class="mt-1 text-sm text-red-600" :message="form.errors.password_confirmation"/>
+                </div>
 
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Reset Password
-                </PrimaryButton>
-            </div>
-        </form>
+                <div class="mt-6">
+                    <PrimaryButton
+                        class="w-full justify-center py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white rounded-lg shadow-md transition-all"
+                        :class="{ 'opacity-50': form.processing }"
+                        :disabled="form.processing"
+                    >
+                        Reset Password
+                    </PrimaryButton>
+                </div>
+            </form>
+        </div>
     </GuestLayout>
 </template>

@@ -1,3 +1,4 @@
+Copy
 <template>
     <div class="min-h-screen bg-[#f9f7f2]">
         <AppHeader/>
@@ -148,12 +149,10 @@
                                     v-if="book.status === 'available'"
                                     @click="borrowBook"
                                     :disabled="!book.is_available || isReserved"
-                                    :class="[
-                                        'w-full inline-flex items-center justify-center rounded-xl px-6 py-4 text-base font-medium text-white shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200',
-                                        book.is_available && !isReserved
-                                            ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500'
-                                            : 'bg-gray-400 cursor-not-allowed'
-                                    ]"
+                                    :class="['w-full inline-flex items-center justify-center rounded-xl px-6 py-4 text-base font-medium text-white shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200',
+book.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500'
+: 'bg-gray-400 cursor-not-allowed'
+]"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24"
                                          fill="none" stroke="currentColor" stroke-width="2">
@@ -174,6 +173,7 @@
                 </div>
             </section>
 
+            Copy
             <!-- Reviews Section -->
             <section class="bg-white rounded-xl shadow-sm overflow-hidden border border-[#e8e3d5] mb-10">
                 <div class="p-6 border-b border-[#e8e3d5] flex justify-between items-center">
@@ -220,9 +220,9 @@
                         <div class="flex items-start">
                             <div
                                 class="bg-gradient-to-br from-amber-100 to-amber-200 rounded-xl p-3 flex-shrink-0 shadow-sm">
-                                <span class="font-medium text-amber-800 text-lg">
-                                    {{ review.user?.name?.charAt(0).toUpperCase() || 'A' }}
-                                </span>
+                            <span class="font-medium text-amber-800 text-lg">
+                                {{ review.user?.name?.charAt(0).toUpperCase() || 'A' }}
+                            </span>
                             </div>
                             <div class="ml-4 flex-1">
                                 <div class="flex items-center justify-between">
@@ -230,27 +230,27 @@
                                         {{ review.user?.name || 'Anonymous Reader' }}
                                     </h3>
                                     <span class="text-sm text-gray-500 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24"
-                                             fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        {{ formatDate(review.created_at) }}
-                                    </span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {{ formatDate(review.created_at) }}
+                                </span>
                                 </div>
                                 <div class="flex items-center mt-1">
                                     <div class="flex">
-                                        <span v-for="i in 5" :key="i" class="text-amber-400">
-                                            <svg v-if="i <= review.rating" class="h-5 w-5 fill-current"
-                                                 viewBox="0 0 20 20">
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                            </svg>
-                                            <svg v-else class="h-5 w-5 fill-current text-gray-300" viewBox="0 0 20 20">
-                                                <path
-                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                            </svg>
-                                        </span>
+                                    <span v-for="i in 5" :key="i" class="text-amber-400">
+                                        <svg v-if="i <= review.rating" class="h-5 w-5 fill-current"
+                                             viewBox="0 0 20 20">
+                                            <path
+                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        <svg v-else class="h-5 w-5 fill-current text-gray-300" viewBox="0 0 20 20">
+                                            <path
+                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                    </span>
                                     </div>
                                     <span class="ml-2 text-sm text-gray-500">{{ review.rating }} out of 5</span>
                                 </div>
@@ -385,11 +385,11 @@
                                 >
                                     <svg
                                         :class="[
-                                            'h-8 w-8',
-                                            star <= (hoverRating || reviewForm.rating)
-                                                ? 'text-amber-400 fill-current'
-                                                : 'text-gray-300'
-                                        ]"
+                                        'h-8 w-8',
+                                        star <= (hoverRating || reviewForm.rating)
+                                            ? 'text-amber-400 fill-current'
+                                            : 'text-gray-300'
+                                    ]"
                                         viewBox="0 0 20 20"
                                     >
                                         <path
@@ -398,10 +398,10 @@
                                 </button>
                             </div>
                             <span class="ml-3 text-sm font-medium text-gray-700">
-                                {{
+                            {{
                                     reviewForm.rating > 0 ? `${reviewForm.rating} star${reviewForm.rating > 1 ? 's' : ''}` : 'Select rating'
                                 }}
-                            </span>
+                        </span>
                         </div>
                     </div>
 
@@ -429,11 +429,11 @@
                             type="button"
                             :disabled="!reviewForm.rating || !reviewForm.comment.trim()"
                             :class="[
-                                'px-4 py-2.5 text-sm font-medium text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2c3e50] transition-all duration-200',
-                                reviewForm.rating && reviewForm.comment.trim()
-                                    ? 'bg-[#2c3e50] hover:bg-[#34495e]'
-                                    : 'bg-gray-400 cursor-not-allowed'
-                            ]"
+                            'px-4 py-2.5 text-sm font-medium text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2c3e50] transition-all duration-200',
+                            reviewForm.rating && reviewForm.comment.trim()
+                                ? 'bg-[#2c3e50] hover:bg-[#34495e]'
+                                : 'bg-gray-400 cursor-not-allowed'
+                        ]"
                         >
                             Submit Review
                         </button>
@@ -443,10 +443,8 @@
         </Modal>
     </div>
 </template>
-
-<script setup>
-import {ref, reactive, computed} from 'vue';
-import {router, Link, usePage} from '@inertiajs/vue3';
+<script setup> import {computed, reactive, ref} from 'vue';
+import {Link, router, usePage} from '@inertiajs/vue3';
 import AppHeader from '@/Components/AppHeader.vue';
 import Footer from '@/Components/AppFooter.vue'
 import FlashMessage from '@/Components/FlashMessage.vue';
@@ -454,115 +452,79 @@ import Modal from '@/Components/Modal.vue';
 
 const props = defineProps({
     book: Object,
-    recommendedBooks: {
-        type: Array,
-        default: () => []
-    },
+    recommendedBooks: {type: Array, default: () => []},
     isReserved: Boolean,
     isBorrowed: Boolean,
     flash: Object
 });
-
 const page = usePage();
-const flash = reactive({
-    success: page.props.flash?.success || null,
-    error: page.props.flash?.error || null
-});
+const flash = reactive({success: page.props.flash?.success || null, error: page.props.flash?.error || null});
 const bookCover = computed(() => {
     return props.book.cover_image_url || '/images/book-cover-placeholder.jpg';
 });
-
 const handleImageError = (e) => {
     e.target.src = '/images/book-cover-placeholder.jpg';
 };
 const showReservationModal = ref(false);
 const showReviewModal = ref(false);
 const hoverRating = ref(0);
-
 const hasReviewed = computed(() => {
     return props.book.reviews?.some(review => review.user_id === page.props.auth.user?.id);
 });
-
-const reviewForm = reactive({
-    rating: 0,
-    comment: ''
-});
-
+const reviewForm = reactive({rating: 0, comment: ''});
 const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
+    return date.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
 };
-
 const reserveBook = () => {
     router.post(`/books/${props.book.id}/reserve`, {}, {
-        preserveScroll: true,
-        onSuccess: () => {
+        preserveScroll: true, onSuccess: () => {
             showReservationModal.value = false;
             flash.success = 'Book reserved successfully!';
-        },
-        onError: (errors) => {
+            router.reload({only: ['book']});
+        }, onError: (errors) => {
+            showReservationModal.value = false;
             flash.error = errors.message || 'Failed to reserve book';
         }
     });
 };
-
 const borrowBook = () => {
     if (confirm('Are you sure you want to borrow this book?')) {
         router.post(`/books/${props.book.id}/borrow`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
+            preserveScroll: true, onSuccess: () => {
                 flash.success = 'Book borrowed successfully!';
-            },
-            onError: (errors) => {
+                router.reload({only: ['book']});
+            }, onError: (errors) => {
                 flash.error = errors.message || 'Failed to borrow book';
             }
         });
     }
 };
-
 const submitReview = () => {
     if (!reviewForm.rating) {
         flash.error = 'Please select a rating';
         return;
     }
-
     if (!reviewForm.comment.trim()) {
         flash.error = 'Please write a review';
         return;
     }
-
-    const reviewData = {
-        rating: reviewForm.rating,
-        comment: reviewForm.comment.trim()
-    };
-
+    const reviewData = {rating: reviewForm.rating, comment: reviewForm.comment.trim()};
     router.post(`/books/${props.book.id}/reviews`, reviewData, {
-        preserveScroll: true,
-        onSuccess: () => {
+        preserveScroll: true, onSuccess: () => {
             showReviewModal.value = false;
             reviewForm.rating = 0;
             reviewForm.comment = '';
             flash.success = 'Review submitted successfully!';
-        },
-        onError: (errors) => {
+        }, onError: (errors) => {
             flash.error = errors.message || 'Failed to submit review';
         }
     });
 };
-
 const isAvailable = computed(() => {
-    return props.book.status === 'available'
-        && props.book.status !== 'borrowed'
-        && props.book.status !== 'reserved';
-});
-</script>
-
-<style>
-/* Custom scrollbar to match the theme */
+    return props.book.status === 'available' && props.book.status !== 'borrowed' && props.book.status !== 'reserved';
+}); </script>
+<style> /* Custom scrollbar to match the theme */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -593,5 +555,4 @@ button, a, .transition-all {
 
 .book-card:hover {
     transform: translateY(-5px);
-}
-</style>
+} </style>

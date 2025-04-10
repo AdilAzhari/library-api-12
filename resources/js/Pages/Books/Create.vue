@@ -177,16 +177,16 @@
                     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- ISBN -->
                         <div>
-                            <label for="isbn" class="block text-sm font-medium text-[#2c3e50] mb-2">ISBN</label>
+                            <label for="ISBN" class="block text-sm font-medium text-[#2c3e50] mb-2">ISBN</label>
                             <input
-                                v-model="form.isbn"
+                                v-model="form.ISBN"
                                 type="text"
-                                id="isbn"
+                                id="ISBN"
                                 placeholder="e.g. 978-3-16-148410-0"
                                 class="w-full rounded-lg border-[#e8e3d5] shadow-sm focus:border-amber-500 focus:ring focus:ring-amber-200 focus:ring-opacity-50 transition duration-300"
                                 maxlength="17"
                             />
-                            <p v-if="errors.isbn" class="mt-1 text-sm text-red-600">{{ errors.isbn }}</p>
+                            <p v-if="errors.ISBN" class="mt-1 text-sm text-red-600">{{ errors.ISBN }}</p>
                         </div>
 
                         <!-- Status -->
@@ -252,7 +252,7 @@ const form = reactive({
     publication_year: '',
     cover_image: null,
     genre_id: '',
-    isbn: '',
+    ISBN: '',
     status: 'available'
 });
 

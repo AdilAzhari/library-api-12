@@ -1,68 +1,42 @@
 <template>
     <div class="min-h-screen bg-[#f9f7f2]">
-        <!-- Header -->
-        <header class="bg-[#2c3e50] text-white shadow-lg">
-            <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-amber-400" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                    <h1 class="text-2xl font-serif font-bold">Borrowing Records</h1>
-                </div>
-                <nav class="hidden md:flex space-x-6">
-                    <Link href="/books" class="hover:text-amber-300 transition">Browse Books</Link>
-                    <Link href="/reservations" class="hover:text-amber-300 transition">My Reservations</Link>
-                </nav>
-            </div>
-        </header>
+        <Header/>
 
         <main class="container mx-auto px-4 py-8 max-w-7xl">
-            <!-- Status Filter -->
-            <div class="mb-8 border-b border-[#d4c9a8]">
-                <nav class="flex space-x-8">
-                    <button
-                        @click="activeStatus = null"
-                        :class="{
-                            'border-b-2 border-amber-500 text-amber-600': activeStatus === null,
-                            'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeStatus !== null
-                        }"
-                        class="px-1 py-4 text-sm font-medium font-serif"
-                    >
-                        All Records
-                    </button>
-                    <button
-                        @click="activeStatus = 'active'"
-                        :class="{
-                            'border-b-2 border-amber-500 text-amber-600': activeStatus === 'active',
-                            'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeStatus !== 'active'
-                        }"
-                        class="px-1 py-4 text-sm font-medium font-serif"
-                    >
-                        Active
-                    </button>
-                    <button
-                        @click="activeStatus = 'overdue'"
-                        :class="{
-                            'border-b-2 border-amber-500 text-amber-600': activeStatus === 'overdue',
-                            'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeStatus !== 'overdue'
-                        }"
-                        class="px-1 py-4 text-sm font-medium font-serif"
-                    >
-                        Overdue
-                    </button>
-                    <button
-                        @click="activeStatus = 'returned'"
-                        :class="{
-                            'border-b-2 border-amber-500 text-amber-600': activeStatus === 'returned',
-                            'border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeStatus !== 'returned'
-                        }"
-                        class="px-1 py-4 text-sm font-medium font-serif"
-                    >
-                        Returned
-                    </button>
-                </nav>
+            <!-- Search and Filters -->
+            <div class="mb-6 bg-white rounded-lg shadow-sm p-4 border border-[#e8e3d5]">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Search Input -->
+                    <div class="flex-grow">
+                        <div class="relative">
+                            <input
+                                type="text"
+                                placeholder="Search by book title, author or user..."
+                                class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                                v-model="searchQuery"
+                            />
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="flex-shrink-0">
+                        <select
+                            v-model="activeStatus"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                        >
+                            <option :value="null">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="overdue">Overdue</option>
+                            <option value="returned">Returned</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Flash Messages -->
@@ -73,10 +47,39 @@
                 {{ $page.props.flash.error }}
             </div>
 
+            <!-- Sort and Count -->
+            <div class="mb-4 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    Showing {{ filteredBorrowings.length }} borrowings
+                </div>
+                <div class="flex items-center space-x-2">
+                    <label for="sort" class="text-sm font-medium text-gray-700">Sort by:</label>
+                    <select
+                        id="sort"
+                        v-model="sortField"
+                        class="rounded-md border-gray-300 py-1 pl-2 pr-8 text-sm focus:border-amber-300 focus:outline-none focus:ring-amber-300"
+                    >
+                        <option value="due_date">Due Date</option>
+                        <option value="borrowed_at">Borrow Date</option>
+                        <option value="book.title">Book Title</option>
+                    </select>
+                    <button
+                        @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+                        class="p-1 rounded-md text-gray-500 hover:bg-gray-100"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  :d="sortOrder === 'asc' ? 'M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4' : 'M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12'"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- Borrowings Grid -->
             <div v-if="filteredBorrowings.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div
-                    v-for="borrowing in filteredBorrowings"
+                    v-for="borrowing in sortedBorrowings"
                     :key="borrowing.id"
                     class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 border border-[#e8e3d5]"
                 >
@@ -156,7 +159,7 @@
                         <!-- Actions -->
                         <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
                             <Link
-                                :href="`/books/${borrowing.book.id}`"
+                                :href="`/borrows/${borrowing.id}`"
                                 class="text-sm text-[#2c3e50] hover:text-amber-600 font-medium flex items-center"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -164,7 +167,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                           d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                View Book
+                                Details
                             </Link>
 
                             <div class="flex space-x-3">
@@ -224,9 +227,7 @@
                 </h3>
                 <p class="mt-1 text-gray-500 max-w-md mx-auto">
                     {{
-                        activeStatus === null
-                            ? 'You have no borrowing records yet.'
-                            : `You have no ${activeStatus} borrowings.`
+                        activeStatus === null ? 'You have no borrowing records yet.' : `You have no ${activeStatus} borrowings.`
                     }}
                 </p>
                 <div class="mt-6">
@@ -238,15 +239,15 @@
             </div>
         </main>
 
-        <!-- Footer -->
-        <footer/>
+        <Footer/>
     </div>
 </template>
 
 <script setup>
-import {computed, defineComponent, ref} from 'vue';
+import {computed, ref} from 'vue';
 import {Link, router} from '@inertiajs/vue3';
-import footer from '@/Components/AppFooter.vue';
+import Header from '@/Components/AppHeader.vue';
+import Footer from '@/Components/AppFooter.vue';
 
 const props = defineProps({
     borrowings: {
@@ -260,25 +261,82 @@ const props = defineProps({
     maxRenewals: {
         type: Number,
         default: 2
+    },
+    filters: {
+        type: Object,
+        default: () => ({})
     }
 });
 
-const activeStatus = ref(null);
+const searchQuery = ref(props.filters.search || '');
+const activeStatus = ref(props.filters.status || null);
+const sortField = ref(props.filters.sort_by || 'due_date');
+const sortOrder = ref(props.filters.sort_order || 'asc');
 
 const filteredBorrowings = computed(() => {
-    if (!activeStatus.value) return props.borrowings;
+    let result = props.borrowings;
 
-    return props.borrowings.filter(borrowing => {
-        switch (activeStatus.value) {
-            case 'active':
-                return !borrowing.returned_at && !borrowing.is_overdue;
-            case 'overdue':
-                return borrowing.is_overdue;
-            case 'returned':
-                return borrowing.returned_at;
-            default:
-                return true;
+    // Apply status filter
+    if (activeStatus.value) {
+        result = result.filter(borrowing => {
+            switch (activeStatus.value) {
+                case 'active':
+                    return !borrowing.returned_at && !borrowing.is_overdue;
+                case 'overdue':
+                    return borrowing.is_overdue;
+                case 'returned':
+                    return borrowing.returned_at;
+                default:
+                    return true;
+            }
+        });
+    }
+
+    // Apply search filter
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        result = result.filter(borrowing => {
+            return (
+                borrowing.book.title.toLowerCase().includes(query) ||
+                borrowing.book.author.toLowerCase().includes(query) ||
+                borrowing.user.name.toLowerCase().includes(query)
+            );
+        });
+    }
+
+    return result;
+});
+
+const sortedBorrowings = computed(() => {
+    const field = sortField.value;
+    const order = sortOrder.value === 'asc' ? 1 : -1;
+
+    return [...filteredBorrowings.value].sort((a, b) => {
+        // Handle nested properties
+        let aValue, bValue;
+
+        if (field.includes('.')) {
+            const [obj, prop] = field.split('.');
+            aValue = a[obj][prop];
+            bValue = b[obj][prop];
+        } else {
+            aValue = a[field];
+            bValue = b[field];
         }
+
+        // Compare dates if the field is a date
+        if (['borrowed_at', 'due_date', 'returned_at'].includes(field)) {
+            aValue = new Date(aValue).getTime();
+            bValue = new Date(bValue).getTime();
+        }
+
+        // Compare strings
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return aValue.localeCompare(bValue) * order;
+        }
+
+        // Compare numbers/dates
+        return (aValue - bValue) * order;
     });
 });
 
@@ -324,17 +382,7 @@ const deleteBorrowing = (id) => {
 </script>
 
 <style scoped>
-/* Custom transitions */
 button, a {
     transition: all 0.2s ease;
-}
-
-/* Card hover effect */
-.borrowing-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.borrowing-card:hover {
-    transform: translateY(-3px);
 }
 </style>

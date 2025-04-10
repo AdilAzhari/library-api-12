@@ -9,7 +9,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                     </svg>
-                    <h1 class="text-2xl font-serif font-bold">Academia Inspired</h1>
+                    <h1 class="text-2xl font-serif font-bold">Library</h1>
                 </div>
                 <nav class="hidden md:flex space-x-6">
                     <Link href="/" class="hover:text-amber-300 transition">Home</Link>
@@ -108,8 +108,8 @@
                                                 :class="getDueDateClass(book.due_date)"
                                                 class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium self-start"
                                             >
-                        Due {{ formatDate(book.due_date) }}
-                      </span>
+                                                Due {{ formatDate(book.due_date) }}
+                                            </span>
                                         </div>
 
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -181,11 +181,11 @@
                                             @click="renewBook(book)"
                                             :disabled="book.renewal_count >= maxRenewals || isOverdue(book.due_date)"
                                             :class="[
-                        'px-4 py-2 text-sm font-medium rounded-lg transition text-center',
-                        book.renewal_count >= maxRenewals || isOverdue(book.due_date)
-                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                          : 'bg-white text-[#2c3e50] border border-[#2c3e50] hover:bg-[#2c3e50] hover:text-white'
-                      ]"
+                                                'px-4 py-2 text-sm font-medium rounded-lg transition text-center',
+                                                book.renewal_count >= maxRenewals || isOverdue(book.due_date)
+                                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                  : 'bg-white text-[#2c3e50] border border-[#2c3e50] hover:bg-[#2c3e50] hover:text-white'
+                                            ]"
                                         >
                                             Renew
                                         </button>
@@ -246,8 +246,8 @@
                                             </div>
                                             <span
                                                 class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 self-start">
-                        Reserved
-                      </span>
+                                                Reserved
+                                            </span>
                                         </div>
 
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -384,10 +384,10 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span :class="getStatusClass(item)"
-                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                      {{ getStatusText(item) }}
-                    </span>
+                                    <span :class="getStatusClass(item)"
+                                          class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                        {{ getStatusText(item) }}
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ formatDate(item.borrowed_at) }}
@@ -438,8 +438,8 @@
                                     v-if="page.active"
                                     class="px-3 py-1 rounded-md border border-[#e8e3d5] bg-[#2c3e50] text-sm font-medium text-white"
                                 >
-                  {{ page.label }}
-                </span>
+                                    {{ page.label }}
+                                </span>
                             </template>
                             <Link
                                 v-if="history.next_page_url"
@@ -591,7 +591,7 @@ const cancelReservation = (reservation) => {
 
 // Borrow a book again from history
 const borrowAgain = (book) => {
-    router.post(`/books/${book.id}/borrow-again`, {}, {
+    router.post(`/books/${book.id}/borrow`, {}, {
         preserveScroll: true,
         onSuccess: () => {
             // The page will refresh with updated data from the backend
