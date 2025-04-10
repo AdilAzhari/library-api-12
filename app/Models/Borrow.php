@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Borrow extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'book_id', 'user_id', 'borrowed_at',
-        'due_date', 'returned_at', 'renewal_count', 'late_fee', 'notes'
+        'due_date', 'returned_at', 'renewal_count', 'late_fee', 'notes',
     ];
 
     protected $casts = [
@@ -69,4 +70,28 @@ class Borrow extends Model
     {
         return $query->where('user_id', $userId);
     }
+
+    public function scopeFilter($query, array $filters): void
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->whereHas('book', function ($query) use ($search) {
+                    $query->where('title', 'like', '%' . $search . '%');
+                })
+                    ->orWhereHas('user', function ($query) use ($search) {
+                        $query->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        })
+            ->when($filters['status'] ?? null, function ($query, $status) {
+                if ($status === 'active') {
+                    $query->active();
+                } elseif ($status === 'overdue') {
+                    $query->overdue();
+                } elseif ($status === 'returned') {
+                    $query->whereNotNull('returned_at');
+                }
+            });
+    }
+
 }

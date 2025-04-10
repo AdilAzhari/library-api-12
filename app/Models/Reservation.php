@@ -85,9 +85,11 @@ class Reservation extends Model
     {
         return $this->expires_at <= now()
             && !$this->isFulfilled()
+            && $this->expires_at->isPast()
             && !$this->isCanceled();
     }
-    public function activeForUser($query, int $userId, int $bookId = null)
+
+    public function scopeActiveForUser($query, int $userId, int $bookId = null)
     {
         $query = $query->where('user_id', $userId)
             ->where('expires_at', '>', now())
@@ -101,4 +103,28 @@ class Reservation extends Model
         return $query;
     }
 
+    public function scopeFilter($query, array $filters): void
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where(function ($query) use ($search) {
+                $query->whereHas('book', function ($query) use ($search) {
+                    $query->where('title', 'like', '%' . $search . '%');
+                })
+                    ->orWhereHas('user', function ($query) use ($search) {
+                        $query->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        })
+            ->when($filters['status'] ?? null, function ($query, $status) {
+                if ($status === 'active') {
+                    $query->active();
+                } elseif ($status === 'expired') {
+                    $query->expired();
+                } elseif ($status === 'fulfilled') {
+                    $query->fulfilled();
+                } elseif ($status === 'canceled') {
+                    $query->whereNotNull('canceled_at');
+                }
+            });
+    }
 }

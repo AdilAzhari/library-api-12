@@ -6,6 +6,7 @@ use App\Aggregates\BookAggregate;
 use App\DTO\BookCreateDTO;
 use App\DTO\BookUpdateDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreBookRequest;
 use App\Models\Book;
 use App\Services\BookService;
 use App\Services\GoogleBooksService;
@@ -44,27 +45,16 @@ class BookController extends Controller
         App::setLocale($locale);
 
         $cacheKey = 'books_' . md5(serialize($request->all()));
-        $books = Cache::remember($cacheKey, 600, function () use ($request) {
+//        $books = Cache::remember($cacheKey, 600, function () use ($request) {
             return $this->bookService->getAllBooks($request->all(), $request->input('per_page', 10));
-        });
+//        });
 
         return $this->successResponse('Books retrieved successfully', $books);
     }
 
-    public function store(Request $request)
+    public function store(StoreBookRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255|unique:books,title,NULL,id,author,' . $request->author,
-            'author' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'publication_year' => 'required|digits:4|integer|min:1900|max:' . now()->format('Y'),
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'genre_id' => 'required|integer|exists:genres,id',
-        ], [
-            'title.unique' => 'A book with this title and author already exists.',
-            'publication_year.max' => 'The publication year cannot be in the future.',
-        ]);
-
+        $request->validated();
         try {
             $dto = BookCreateDTO::fromRequest($request);
             $bookAggregate = BookAggregate::retrieve($request->input('id') ?? uniqid());

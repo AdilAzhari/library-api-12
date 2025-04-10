@@ -16,7 +16,9 @@ readonly class BookCreateDTO
         public ?string       $description = null,
         public int           $genre_id,
         public ?UploadedFile $cover_image = null,
-        public ?string       $isbn = null,
+        public ?string       $ISBN = null,
+        public ?string       $cover_image_path = null,
+        public float         $average_rating = 0,
         public string        $status = 'available',
     )
     {
@@ -25,13 +27,13 @@ readonly class BookCreateDTO
     public static function fromRequest(Request $request): self
     {
         return new self(
-            title: $request->input('title'),
-            author: $request->input('author'),
+            title: $request->string('title'),
+            author: $request->string('author'),
             publication_year: $request->input('publication_year'),
             description: $request->input('description'),
-            genre_id: $request->input('genre_id'),
+            genre_id: $request->integer('genre_id'),
             cover_image: $request->file('cover_image'),
-            isbn: $request->input('isbn'),
+            ISBN: $request->input('ISBN'),
             status: $request->input('status', 'available')
         );
     }
@@ -45,7 +47,7 @@ readonly class BookCreateDTO
             'description' => 'nullable|string',
             'genre_id' => 'required|integer|exists:genres,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'isbn' => 'nullable|string|max:17|unique:books,isbn',
+            'ISBN' => 'nullable|string|max:17|unique:books,ISBN',
             'status' => 'sometimes|in:available,borrowed,reserved',
         ], [
             'title.required' => 'The book title is required.',
@@ -61,8 +63,8 @@ readonly class BookCreateDTO
             'cover_image.image' => 'The cover must be an image file.',
             'cover_image.mimes' => 'The cover must be a file of type: jpeg, png, jpg, gif, or webp.',
             'cover_image.max' => 'The cover image may not be larger than 2MB.',
-            'isbn.max' => 'The ISBN may not be longer than 17 characters.',
-            'isbn.unique' => 'This ISBN already exists in our system.',
+            'ISBN.max' => 'The ISBN may not be longer than 17 characters.',
+            'ISBN.unique' => 'This ISBN already exists in our system.',
             'status.in' => 'The selected status is invalid.'
         ])->validate();
     }
@@ -81,7 +83,7 @@ readonly class BookCreateDTO
             description: $this->description ? trim($this->description) : null,
             genre_id: $this->genre_id,
             cover_image: $this->cover_image,
-            isbn: $this->isbn ? preg_replace('/[^0-9X]/', '', $this->isbn) : null,
+            ISBN: $this->ISBN ? preg_replace('/[^0-9X]/', '', $this->ISBN) : null,
             status: $this->status
         );
     }
@@ -113,7 +115,7 @@ readonly class BookCreateDTO
             'description' => $this->description,
             'publication_year' => $this->publication_year,
             'genre_id' => $this->genre_id,
-            'isbn' => $this->isbn,
+            'ISBN' => $this->ISBN,
             'status' => $this->status,
         ];
     }
@@ -127,7 +129,7 @@ readonly class BookCreateDTO
             description: $data['description'] ?? null,
             genre_id: $data['genre_id'],
             cover_image: $data['cover_image'] ?? null,
-            isbn: $data['isbn'] ?? null,
+            ISBN: $data['ISBN'] ?? null,
             status: $data['status'] ?? 'available'
         );
     }

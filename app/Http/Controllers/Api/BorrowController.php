@@ -25,8 +25,6 @@ class BorrowController extends Controller
             $dto = new BorrowBookDTO(
                 $request->input('book_id'),
                 $request->input('user_id'),
-                borrowed_at: $request->input('borrowed_at'),
-                returned_at: $request->input('returned_at')
             );
 
             $borrowing = $this->borrowingService->borrowBook($dto);
@@ -54,4 +52,5 @@ class BorrowController extends Controller
             return $this->serverErrorResponse('An error occurred while returning the book.');
         }
     }
+
 }

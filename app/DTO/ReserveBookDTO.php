@@ -2,15 +2,24 @@
 
 namespace App\DTO;
 
+use DateTime;
+use InvalidArgumentException;
+
 class ReserveBookDTO
 {
     public function __construct(
-        public int $bookId,
-        public int $userId,
-        public ?string $reservedAt = null,
-        public ?string $expiresAt = null
+        public readonly int $bookId,
+        public readonly int $userId,
+        public ?DateTime $expiresAt = null
     ) {
-        $this->reservedAt = $reservedAt ?? now()->toDateTimeString();
-        $this->expiresAt = $expiresAt ?? now()->addDays(config('library.reservation_expiry_days', 7))->toDateTimeString();
+        if ($this->bookId <= 0) {
+            throw new InvalidArgumentException('Invalid book ID');
+        }
+
+        if ($this->userId <= 0) {
+            throw new InvalidArgumentException('Invalid user ID');
+        }
+
+        $this->expiresAt = $expiresAt ?? now()->addDays(7);
     }
 }

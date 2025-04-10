@@ -35,7 +35,12 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    protected $appends = ['is_admin'];
 
+    public function getIsAdminAttribute(): bool
+    {
+        return $this->role === 'admin';
+    }
     public function ScopeIsAdmin(): bool
     {
         return $this->role === 'admin';

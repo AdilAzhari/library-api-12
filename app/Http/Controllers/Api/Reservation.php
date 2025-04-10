@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\DTO\ReserveBookDTO;
 use App\Http\Controllers\Controller;
 use App\Services\ReservationService;
+use Exception;
 use Illuminate\Http\Request;
 
 class Reservation extends Controller
@@ -13,11 +14,16 @@ class Reservation extends Controller
     {
     }
 
+    /**
+     * @throws Exception
+     */
     public function reserveBook(Request $request)
     {
         $dto = new ReserveBookDTO(
-            bookId: $request->input('book_id'),
-            userId: $request->input('user_id'),
+            $request->integer('book_id'),
+            $request->integer('user_id'),
+            $request->input('fulfilled_at'),
+            $request->input('fulfilled_at'),
         );
 
         $reservation = $this->reservationService->reserveBook($dto);

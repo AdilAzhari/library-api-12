@@ -2,16 +2,16 @@
 
 namespace App\Enum;
 
-enum GenreStatus: string
+enum GenreStatus: int
 {
-    case ACTIVE = 'Active';
-    case INACTIVE = 'Inactive';
+    case ACTIVE = 1;
+    case INACTIVE = 0;
 
     public static function enumValues(): array
     {
         return [
-            'ACTIVE' => __('Active'),
-            'INACTIVE' => __('Inactive'),
+            'ACTIVE' => 1,
+            'INACTIVE' => 0,
         ];
     }
 
