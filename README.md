@@ -1,231 +1,227 @@
-# Library API
+![Project Banner](https://github.com/user-attachments/assets/f71c2524-7db9-41d5-8edd-119d1f6d1ca4)
+ # Library Management System
 
-A robust Laravel-based API for managing a library system. This project includes features like **GraphQL**, **Event Sourcing**, **Multi-Language Support**, and more.
+
+A comprehensive Laravel-based system with API and frontend for managing library operations. Includes **GraphQL API**, **Event Sourcing**, **Multi-Language Support**, **Reservations**, **Borrowing System**, and responsive frontend.
+
+[![Laravel Version](https://img.shields.io/badge/Laravel-12.x-orange.svg)](https://laravel.com)
+[![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-purple.svg)](https://php.net)
 
 ---
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Installation](#installation)
-3. [API Endpoints](#api-endpoints)
-4. [GraphQL](#graphql)
-5. [Event Sourcing](#event-sourcing)
-6. [Multi-Language Support](#multi-language-support)
-7. [Testing](#testing)
-8. [Contributing](#contributing)
-9. [License](#license)
+1. [Key Features](#key-features)
+2. [System Architecture](#system-architecture)
+3. [Installation Guide](#installation-guide)
+4. [API Documentation](#api-documentation)
+5. [Frontend Features](#frontend-features)
+6. [GraphQL API](#graphql-api)
+7. [Event Sourcing](#event-sourcing)
+8. [Multi-Language Support](#multi-language-support)
+9. [Testing](#testing)
+---
+
+## Key Features
+
+### API Features
+- **REST API**: Full CRUD operations for books, reservations, and borrows
+- **GraphQL**: Flexible querying for all library data
+- **Event Sourcing**: Complete audit trail for all changes
+- **Multi-Language Support**: English & Arabic with auto-translation
+- **Google Books Integration**: Enrich catalog with Google Books data
+- **Recommendation Engine**: Personalized book suggestions
+- **Export Capabilities**: Excel exports for all data
+
+### Frontend Features
+- **Book Management**: Browse, search, and manage books
+- **Reservation System**: Place and manage reservations
+- **Borrowing System**: Check-out and return books
+- **User Dashboard**: Personalized user portal
+- **Admin Panel**: Comprehensive management interface
+- **Responsive Design**: Works on all devices
 
 ---
 
-## Features
+## System Architecture
 
-- **REST API**: Manage books with CRUD operations.
-- **GraphQL**: Flexible querying for books and related data.
-- **Event Sourcing**: Track changes to books using events.
-- **Multi-Language Support**: Supports English and Arabic with automatic translation.
-- **Export Data**: Export books to Excel.
-- **Google Books Integration**: Fetch book data from Google Books API.
-- **Recommendations**: Get book recommendations based on genre.
-- **Health Check**: A simple endpoint to check API health.
+```mermaid
+graph TD
+    A[Frontend] -->|API Calls| B[Laravel Backend]
+    B --> C[MySQL Database]
+    B --> D[GraphQL]
+    B --> E[Event Store]
+    B --> F[Google Books API]
+    A --> G[Browser]
+```
 
 ---
 
-## Installation
+## Installation Guide
 
-1. **Clone the Repository**:
+### Prerequisites
+- PHP 8.1+
+- Composer 2.0+
+- MySQL 5.7+
+- Node.js 16+ (for frontend)
+
+### Setup Steps
+
+1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/library-api.git
-   cd library-api
+   git clone https://github.com/your-username/library-management.git
+   cd library-management
    ```
 
-2. **Install Dependencies**:
+2. **Install dependencies**:
    ```bash
    composer install
+   npm install
    ```
 
-3. **Set Up Environment**:
-   - Copy `.env.example` to `.env`:
-     ```bash
-     cp .env.example .env
-     ```
-   - Generate an application key:
-     ```bash
-     php artisan key:generate
-     ```
-   - Configure your database in `.env`:
-     ```env
-     DB_CONNECTION=mysql
-     DB_HOST=127.0.0.1
-     DB_PORT=3306
-     DB_DATABASE=library
-     DB_USERNAME=root
-     DB_PASSWORD=
-     ```
-
-4. **Run Migrations**:
+3. **Configure environment**:
    ```bash
-   php artisan migrate
+   cp .env.example .env
+   php artisan key:generate
    ```
 
-5. **Seed the Database (Optional)**:
+4. **Database setup**:
    ```bash
-   php artisan db:seed
+   php artisan migrate --seed
    ```
 
-6. **Start the Development Server**:
+5. **Build frontend assets**:
+   ```bash
+   npm run build
+   ```
+
+6. **Start development servers**:
    ```bash
    php artisan serve
+   npm run dev
    ```
 
----
-
-## API Endpoints
-
-### REST API
-
-| Method   | URI                              | Description                     |
-|----------|----------------------------------|---------------------------------|
-| GET      | `/api/v1/books`                  | List all books                  |
-| POST     | `/api/v1/books`                  | Create a new book               |
-| GET      | `/api/v1/books/{book}`           | Get a single book               |
-| PUT      | `/api/v1/books/{book}`           | Update a book                   |
-| DELETE   | `/api/v1/books/{book}`           | Delete a book                   |
-| POST     | `/api/v1/books/{id}/restore`     | Restore a deleted book          |
-| GET      | `/api/v1/books/export`           | Export books to Excel           |
-| GET      | `/api/v1/books/fetch-from-google`| Fetch books from Google Books   |
-| GET      | `/api/v1/books/{book}/recommend` | Get book recommendations        |
-| GET      | `/api/v1/health`                 | Health check endpoint           |
+Access the system at `http://localhost:8000`
 
 ---
 
-## GraphQL
+## API Documentation
 
-The API supports GraphQL for flexible querying. Use the `/graphql` endpoint to interact with the GraphQL API.
+Full API documentation is available at `/api/documentation` after setup.
+
+### Core Endpoints
+
+| Resource     | Endpoint                          | Methods       |
+|--------------|-----------------------------------|---------------|
+| Books        | `/api/v1/books`                   | GET, POST     |
+| Book         | `/api/v1/books/{id}`              | GET, PUT, DELETE |
+| Reservations | `/api/v1/reservations`            | GET, POST     |
+| Borrows      | `/api/v1/borrows`                 | GET, POST     |
+| Users        | `/api/v1/users`                   | GET           |
+
+### Special Endpoints
+- `POST /api/v1/books/{id}/reserve` - Reserve a book
+- `POST /api/v1/books/{id}/borrow` - Borrow a book
+- `POST /api/v1/books/{id}/return` - Return a book
+- `GET /api/v1/books/recommendations` - Get personalized recommendations
+
+---
+
+## Frontend Features
+
+### Book Management
+![Book Management Screenshot](https://github.com/user-attachments/assets/f5d2872f-28b7-46b3-8678-f7daf70f8d61)
+![image](https://github.com/user-attachments/assets/1fc84577-8b36-4a92-bc44-56dbeaec69a4)
+
+- Browse all books with pagination
+- Advanced search and filtering
+- Book details with availability status
+- Admin CRUD interface
+
+### Reservation System
+- Place reservations for available books
+- View reservation status
+- Cancel reservations
+- Reservation history
+
+### Borrowing System
+- Check-out books
+- View due dates
+- Renew books
+- Return books
+
+---
+
+## GraphQL API
+
+Access the GraphQL playground at `/graphql-playground`
 
 ### Example Queries
 
-1. **Get All Books**:
-   ```graphql
-   query {
-       books {
-           id
-           title
-           author
-       }
-   }
-   ```
+```graphql
+# Get books with availability status
+query {
+  books {
+    id
+    title
+    author
+    status
+  }
+}
 
-2. **Get a Single Book**:
-   ```graphql
-   query {
-       book(id: 1) {
-           id
-           title
-           author
-       }
-   }
-   ```
-
-3. **Create a Book**:
-   ```graphql
-   mutation {
-       createBook(input: {
-           title: "Laravel API",
-           author: "John Doe",
-           publication_year: 2024,
-           description: "A book about Laravel APIs."
-       }) {
-           id
-           title
-       }
-   }
-   ```
+# Place a reservation
+mutation {
+  reserveBook(input: {
+    book_id: 1
+    user_id: 1
+    reserved_until: "2024-12-31"
+  }) {
+    id
+    status
+  }
+}
+```
 
 ---
 
 ## Event Sourcing
 
-The API uses Event Sourcing to track changes to books. All changes are stored as events, and the current state is rebuilt by replaying these events.
+All changes are recorded as events:
 
-### Example Events
-
-- **BookCreated**: Emitted when a new book is created.
-- **BookUpdated**: Emitted when a book is updated.
-- **BookDeleted**: Emitted when a book is deleted.
-
-### Example Usage
-
-```php
-$bookAggregate = BookAggregate::retrieve($uuid);
-$bookAggregate->createBook([
-    'title' => 'Laravel API',
-    'author' => 'John Doe',
-])->persist();
+```mermaid
+sequenceDiagram
+    User->>+System: Update Book
+    System->>+Event Store: Record BookUpdated
+    Event Store-->>-System: Acknowledge
+    System-->>-User: Success
 ```
+
+View event history at `/admin/events`
 
 ---
 
 ## Multi-Language Support
 
-The API supports English and Arabic. Translations are stored in the `lang` directory.
-
-### Example Translations
-
-1. **English** (`lang/en/messages.php`):
-   ```php
-   return [
-       'welcome' => 'Welcome to our application!',
-       'book' => 'Book',
-   ];
-   ```
-
-2. **Arabic** (`lang/ar/messages.php`):
-   ```php
-   return [
-       'welcome' => 'مرحبًا بكم في تطبيقنا!',
-       'book' => 'كتاب',
-   ];
-   ```
-
-### Automatic Translation
-
-The API integrates with **Google Translate** for automatic translation between English and Arabic.
+Switch between English and Arabic with automatic translation:
 
 ```php
-use Stichoza\GoogleTranslate\GoogleTranslate;
-
-$translator = new GoogleTranslate();
-$translator->setSource('en')->setTarget('ar');
-
-$translatedText = $translator->translate('Welcome to our application!');
-echo $translatedText; // Outputs "مرحبًا بكم في تطبيقنا!"
+// Example translation usage
+__('messages.welcome'); // Returns based on current locale
 ```
+
+Translation files located in `lang/{en,ar}`
 
 ---
 
 ## Testing
 
-Run the tests using Pest:
+Run the test suite:
 
 ```bash
 php artisan test
 ```
 
----
-
-## Contributing
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeature`).
-3. Commit your changes (`git commit -m 'Add some feature'`).
-4. Push to the branch (`git push origin feature/YourFeature`).
-5. Open a pull request.
-
----
-
-## License
-
-This project is open-source and available under the [MIT License](LICENSE).
-
----
+Test coverage includes:
+- Unit tests for core logic
+- Feature tests for API endpoints
+- Browser tests for frontend
