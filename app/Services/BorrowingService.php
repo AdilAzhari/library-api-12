@@ -59,7 +59,7 @@ class BorrowingService
                 'notes' => $dto->notes ?? null,
             ]);
 
-            $this->updateBookStatus($borrow->book, 'available');
+            $this->updateBookStatus($borrow->book, 'Available');
 
             event(new BookReturned($borrow));
 
@@ -259,5 +259,10 @@ class BorrowingService
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
+    }
+
+    public function deleteBorrow(int $id): void
+    {
+        Borrow::query()->where('id', $id)->delete();
     }
 }

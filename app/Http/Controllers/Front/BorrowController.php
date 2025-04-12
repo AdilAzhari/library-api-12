@@ -155,23 +155,11 @@ class BorrowController extends Controller
         }
     }
 
-//    public function renew(int $id): RedirectResponse
-//    {
-//        try {
-//            $borrow = $this->borrowingService->getBorrowDetails($id);
-//            Gate::authorize('renew', $borrow);
-//
-//            $borrow = $this->borrowingService->renewBorrow($borrow);
-//
-//            return redirect()
-//                ->back()
-//                ->with('success', 'Borrowing renewed until ' .
-//                    $borrow->due_date->format('M j, Y'));
-//
-//        } catch (\Exception $e) {
-//            return redirect()
-//                ->back()
-//                ->with('error', 'Renewal failed: ' . $e->getMessage());
-//        }
-//    }
+    public function destroy(int $id): RedirectResponse
+    {
+        $this->borrowingService->deleteBorrow($id);
+        return redirect()
+            ->route('borrows.index')
+            ->with('success', 'Borrowing cancelled successfully');
+    }
 }
