@@ -10,8 +10,8 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Middleware\AdminMiddleware;
 
 Route::prefix('admin')->as('admin.')
-    ->middleware(['auth', 'verified'])->group(function () {
-//        ,AdminMiddleware::class]
+    ->middleware(['auth', 'verified', AdminMiddleware::class])->group(function () {
+
     Route::controller(ProfileController::class)
         ->prefix('profile')
         ->as('profile.')
@@ -40,7 +40,7 @@ Route::prefix('admin')->as('admin.')
             Route::get('/', 'index')->name('.index');
         });
     // Dashboard
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Books
     Route::resource('/books', AdminBookController::class)->except(['show']);
