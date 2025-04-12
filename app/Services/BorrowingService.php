@@ -115,16 +115,12 @@ class BorrowingService
 
     public function getBorrowDetails(int $id): Borrow
     {
-
-        dd(Borrow::with(['book', 'reservation'])->findOrFail($id));
-        return Borrow::with(['book', 'user', 'reservation'])
+        return Borrow::with(['book', 'user', 'fulfilledReservation'])
             ->findOrFail($id);
     }
 
     public function getBookBorrowHistory(int $bookId, int $perPage = 5): LengthAwarePaginator
     {
-
-        dd('here');
         return Borrow::with('user')
             ->where('book_id', $bookId)
             ->orderBy('borrowed_at', 'desc')
