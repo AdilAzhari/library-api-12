@@ -145,7 +145,9 @@
                             </div>
                             <div v-if="borrowing.late_fee > 0" class="flex justify-between">
                                 <span>Late fee:</span>
-                                <span class="font-medium text-red-600">${{ borrowing.late_fee.toFixed(2) }}</span>
+                                <span class="font-medium text-red-600">${{
+                                        Number(borrowing.late_fee).toFixed(2)
+                                    }}</span>
                             </div>
                             <div v-if="borrowing.renewal_count > 0" class="flex justify-between">
                                 <span>Renewals:</span>
