@@ -77,9 +77,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span :class="{
-                              'bg-purple-100 text-purple-800': user.role === 'admin',
-                              'bg-blue-100 text-blue-800': user.role === 'librarian',
-                              'bg-gray-100 text-gray-800': user.role === 'member'
+                              'bg-purple-100 text-purple-800': user.role === 'Admin',
+                              'bg-blue-100 text-blue-800': user.role === 'Librarian',
+                              'bg-gray-100 text-gray-800': user.role === 'Member'
                             }" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                               {{ user.role }}
                             </span>

@@ -26,9 +26,9 @@
                     <select v-model="statusFilter"
                             class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#2c3e50] focus:border-[#2c3e50] sm:text-sm rounded-md">
                         <option value="">All Statuses</option>
-                        <option value="available">Available</option>
-                        <option value="borrowed">Borrowed</option>
-                        <option value="reserved">Reserved</option>
+                        <option value="Available">Available</option>
+                        <option value="Borrowed">Borrowed</option>
+                        <option value="Reserved">Reserved</option>
                     </select>
                 </div>
             </div>
@@ -80,9 +80,9 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ book.author }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                 <span :class="{
-                  'bg-green-100 text-green-800': book.status === 'available',
-                  'bg-yellow-100 text-yellow-800': book.status === 'reserved',
-                  'bg-red-100 text-red-800': book.status === 'borrowed'
+                  'bg-green-100 text-green-800': book.status === 'Available',
+                  'bg-yellow-100 text-yellow-800': book.status === 'Reserved',
+                  'bg-red-100 text-red-800': book.status === 'Borrowed'
                 }" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
                   {{ book.status }}
                 </span>
