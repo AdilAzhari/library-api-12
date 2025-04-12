@@ -25,6 +25,7 @@
                         </div>
                     </div>
                     <div class="ml-4">
+                        <label for="statusFilter" class="sr-only">Status Filter</label>
                         <select v-model="statusFilter"
                                 class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-[#2c3e50] focus:border-[#2c3e50] sm:text-sm rounded-md">
                             <option value="active">Active</option>
