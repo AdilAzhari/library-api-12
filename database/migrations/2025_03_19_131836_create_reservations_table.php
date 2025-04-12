@@ -22,7 +22,7 @@ return new class extends Migration {
                 ->onDelete('set null');
             $table->timestamp('canceled_at')->nullable();
             $table->timestamps();
-
+            $table->timestamp('fulfilled_at')->nullable();;
             $table->index('expires_at');
         });
     }
