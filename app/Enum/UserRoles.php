@@ -5,15 +5,15 @@ namespace App\Enum;
 enum UserRoles: string
 {
     case Admin = 'Admin';
-    case librarian = 'librarian';
-    case member = 'member';
+    case Librarian = 'Librarian';
+    case Member = 'Member';
 
     public static function values(): array
     {
         return [
             'Admin' => 'Admin',
-            'librarian' => 'librarian',
-            'member' => 'member',
+            'Librarian' => 'Librarian',
+            'Member' => 'Member',
         ];
     }
 

@@ -33,8 +33,8 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'role' => $this->faker->randomElement([
                 UserRoles::Admin,
-                UserRoles::librarian,
-                UserRoles::member,
+                UserRoles::Librarian,
+                UserRoles::Member,
             ])
         ];
     }

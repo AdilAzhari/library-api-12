@@ -25,7 +25,7 @@ class BookFactory extends Factory
             'description' => $this->faker->paragraph(),
             'genre_id' => Genre::factory(),
             'ISBN' => $this->faker->isbn13,
-            'status' => $this->faker->randomElement(['available', 'borrowed', 'reserved']),
+            'status' => $this->faker->randomElement(['Available', 'Borrowed', 'Reserved']),
             'average_rating' => $this->faker->randomFloat(1, 1, 5),
         ];
     }
