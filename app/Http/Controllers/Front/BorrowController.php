@@ -61,6 +61,7 @@ class BorrowController extends Controller
     {
         try {
             $borrow = $this->borrowingService->getBorrowDetails($id);
+
             Gate::authorize('view', $borrow);
 
             $borrowHistory = $this->borrowingService->getBookBorrowHistory($borrow->book_id);
@@ -105,7 +106,6 @@ class BorrowController extends Controller
     public function renew(int $id): RedirectResponse
     {
         try {
-            dd('hello');
             $borrow = $this->borrowingService->getBorrowDetails($id);
             Gate::authorize('renew', $borrow);
 
@@ -128,9 +128,9 @@ class BorrowController extends Controller
         try {
 
             $borrow = $this->borrowingService->getBorrowDetails($id);
-//            Gate::authorize('return', $borrow);
 
-            dd('here');
+            Gate::authorize('return', $borrow);
+
             $dto = new ReturnBookDTO(
                 borrowId: $borrow->id,
                 bookId: $borrow->book_id,
