@@ -18,7 +18,7 @@ class BookObserver
         BookCreated::dispatch($book);
     }
 
-    public function creating(Book $book)
+    public function creating(Book $book): void
     {
         $book->status = $book->status ?? BookStatus::STATUS_AVAILABLE->value;
 
