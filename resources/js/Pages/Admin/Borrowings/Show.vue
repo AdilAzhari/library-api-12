@@ -10,7 +10,7 @@
                     <!-- Book Information -->
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 h-20 w-20">
-                            <img v-if="borrowing.book.cover_image_url" :src="borrowing.book.cover_image_url"
+                            <img v-if="borrow.book.cover_image_url" :src="borrow.book.cover_image_url"
                                  class="h-full w-full rounded object-cover">
                             <div v-else class="h-full w-full rounded bg-gray-200 flex items-center justify-center">
                                 <svg class="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24"
@@ -21,16 +21,16 @@
                             </div>
                         </div>
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">{{ borrowing.book.title }}</h3>
-                            <p class="text-sm text-gray-500">{{ borrowing.book.author }}</p>
+                            <h3 class="text-lg font-medium text-gray-900">{{ borrow.book.title }}</h3>
+                            <p class="text-sm text-gray-500">{{ borrow.book.author }}</p>
                         </div>
                     </div>
 
                     <!-- User Information -->
                     <div>
                         <h4 class="text-sm font-medium text-gray-500">Borrowed By</h4>
-                        <p class="mt-1 text-sm text-gray-900">{{ borrowing.user.name }}</p>
-                        <p class="text-sm text-gray-500">{{ borrowing.user.email }}</p>
+                        <p class="mt-1 text-sm text-gray-900">{{ borrow.user.name }}</p>
+                        <p class="text-sm text-gray-500">{{ borrow.user.email }}</p>
                     </div>
 
                     <!-- Dates -->
@@ -38,19 +38,19 @@
                         <div>
                             <h4 class="text-sm font-medium text-gray-500">Borrowed Date</h4>
                             <p class="mt-1 text-sm text-gray-900">
-                                {{ new Date(borrowing.borrowed_at).toLocaleDateString() }}</p>
+                                {{ new Date(borrow.borrowed_at).toLocaleDateString() }}</p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500">Due Date</h4>
                             <p class="mt-1 text-sm text-gray-900">{{
-                                    new Date(borrowing.due_date).toLocaleDateString()
+                                    new Date(borrow.due_date).toLocaleDateString()
                                 }}</p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500">Returned Date</h4>
                             <p class="mt-1 text-sm text-gray-900">
                                 {{
-                                    borrowing.returned_at ? new Date(borrowing.returned_at).toLocaleDateString() : 'Not returned'
+                                    borrow.returned_at ? new Date(borrow.returned_at).toLocaleDateString() : 'Not returned'
                                 }}
                             </p>
                         </div>
@@ -58,14 +58,25 @@
 
                     <!-- Status -->
                     <div>
-                        <h4 class="text-sm font-medium text-gray-500">Status</h4>
-                        <span :class="{
-              'bg-green-100 text-green-800': status === 'active',
-              'bg-red-100 text-red-800': status === 'overdue',
-              'bg-gray-100 text-gray-800': status === 'returned'
-            }" class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-              {{ status }}
-            </span>
+                        <!-- Status Indicator -->
+                        <div class="h-2" :class="{
+    'bg-green-500': borrow.status === 'returned',
+    'bg-blue-500': borrow.status === 'active',
+    'bg-red-500': borrow.status === 'overdue'
+}"></div>
+
+                        <!-- Status Badge -->
+                        <span class="inline-block px-3 py-1 text-sm font-medium rounded-full"
+                              :class="{
+        'bg-green-100 text-green-800': borrow.status === 'returned',
+        'bg-blue-100 text-blue-800': borrow.status === 'active',
+        'bg-red-100 text-red-800': borrow.status === 'overdue'
+    }">
+    {{
+                                borrow.status === 'returned' ? 'Returned' :
+                                    borrow.status === 'overdue' ? 'Overdue' : 'Active'
+                            }}
+</span>
                     </div>
                 </div>
 
@@ -86,7 +97,7 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import {Link} from '@inertiajs/vue3';
 
 const props = defineProps({
-    borrowing: Object,
+    borrow: Object,
     status: String
 });
 </script>
