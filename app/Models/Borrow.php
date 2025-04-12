@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Borrow extends Model
 {
@@ -31,9 +32,9 @@ class Borrow extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function reservation(): BelongsTo
+    public function fulfilledReservation(): HasOne
     {
-        return $this->belongsTo(Reservation::class, 'fulfilled_by_borrow_id');
+        return $this->hasOne(Reservation::class, 'fulfilled_by_borrow_id');
     }
 
     public function isOverdue(): bool
