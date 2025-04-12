@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->date('returned_at')->nullable();
             $table->integer('renewal_count')->default(0);
             $table->decimal('late_fee', 8, 2)->nullable()->default(0);
+            $table->enum('status', ['Active', 'Completed', 'Cancelled'])->default('active');
             $table->text('notes')->nullable();
             $table->timestamps();
 
