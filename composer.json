@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^3.1",
         "pusher/pusher-php-server": "^7.2",
+        "rebing/graphql-laravel": "^9.9",
         "spatie/laravel-event-sourcing": "^7.11",
         "spatie/laravel-permission": "^6.16",
         "stichoza/google-translate-php": "^5.2",

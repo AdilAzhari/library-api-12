@@ -15,7 +15,7 @@ class AdminBookController extends Controller
     {
         return Inertia::render('Admin/Books/Index', [
             'books' => Book::query()
-                ->with('genre')
+                ->with(['genre','activeReservation'])
                 ->when(request('search'), function ($query, $search) {
                     $query->where('title', 'like', "%$search%")
                         ->orWhere('author', 'like', "%$search%")
