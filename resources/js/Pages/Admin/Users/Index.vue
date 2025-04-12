@@ -9,7 +9,8 @@
         </div>
 
         <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="p-4 border-b border-gray-200">
+            <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-4">
+                <!-- Search Input -->
                 <div class="flex-1 max-w-md">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -21,6 +22,17 @@
                         <input v-model="search" type="text" placeholder="Search users..."
                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-[#2c3e50] focus:border-[#2c3e50] sm:text-sm">
                     </div>
+                </div>
+
+                <!-- Role Filter Dropdown -->
+                <div class="w-full sm:w-48">
+                    <select v-model="role" @change="handleRoleChange"
+                            class="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#2c3e50] focus:border-[#2c3e50] sm:text-sm rounded-md">
+                        <option value="">All Roles</option>
+                        <option v-for="(label, value) in roles" :key="value" :value="value">
+                            {{ label }}
+                        </option>
+                    </select>
                 </div>
             </div>
 
@@ -64,13 +76,13 @@
                             {{ user.email }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                <span :class="{
-                  'bg-purple-100 text-purple-800': user.role === 'admin',
-                  'bg-blue-100 text-blue-800': user.role === 'librarian',
-                  'bg-gray-100 text-gray-800': user.role === 'user'
-                }" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                  {{ user.role }}
-                </span>
+                            <span :class="{
+                              'bg-purple-100 text-purple-800': user.role === 'admin',
+                              'bg-blue-100 text-blue-800': user.role === 'librarian',
+                              'bg-gray-100 text-gray-800': user.role === 'member'
+                            }" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                              {{ user.role }}
+                            </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ new Date(user.created_at).toLocaleDateString() }}
@@ -124,16 +136,19 @@ import {debounce} from 'lodash';
 
 const props = defineProps({
     users: Object,
-    filters: Object
+    filters: Object,
+    roles: Object
 });
 
 const search = ref(props.filters.search);
+const role = ref(props.filters.role || '');
 const showDeleteModal = ref(false);
 const selectedUser = ref(null);
 
+// Watch for search changes
 watch(search, debounce((value) => {
     router.get('/admin/users',
-        {search: value},
+        {search: value, role: role.value},
         {
             preserveState: true,
             preserveScroll: true,
@@ -142,19 +157,20 @@ watch(search, debounce((value) => {
         }
     );
 }, 300));
-const handleNavigation = async (url) => {
-    if (!url) return;
 
-    await router.visit(url, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['users'], // Only update users data
-        onSuccess: () => {
-            // Force update if needed
-            router.reload({only: ['users']});
+// Handle role filter change
+const handleRoleChange = () => {
+    router.get('/admin/users',
+        {search: search.value, role: role.value},
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            only: ['users', 'filters']
         }
-    });
+    );
 };
+
 const confirmDelete = (user) => {
     selectedUser.value = user;
     showDeleteModal.value = true;
@@ -168,4 +184,32 @@ const deleteUser = () => {
         }
     });
 };
+
+const handleNavigation = async (url) => {
+    if (!url) return;
+
+    await router.visit(url, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['users'],
+        onSuccess: () => {
+            router.reload({only: ['users']});
+        }
+    });
+};
 </script>
+
+<style scoped>
+select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+</style>
