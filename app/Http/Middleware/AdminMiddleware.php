@@ -19,7 +19,6 @@ class AdminMiddleware
         if (!Auth::check() || Auth::user()->role !== 'Admin') {
             abort(403, 'Unauthorized action.');
         }
-
         return $next($request);
     }
 }

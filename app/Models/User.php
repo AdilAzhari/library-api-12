@@ -39,11 +39,11 @@ class User extends Authenticatable
 
     public function getIsAdminAttribute(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'Admin';
     }
     public function ScopeIsAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'Admin';
     }
 
     /**
