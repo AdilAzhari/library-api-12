@@ -7,8 +7,11 @@ use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminReservationController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Middleware\AdminMiddleware;
 
-Route::prefix('admin')->as('admin.')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('admin')->as('admin.')
+    ->middleware(['auth', 'verified'])->group(function () {
+//        ,AdminMiddleware::class]
     Route::controller(ProfileController::class)
         ->prefix('profile')
         ->as('profile.')
@@ -32,8 +35,8 @@ Route::prefix('admin')->as('admin.')->middleware(['auth', 'verified'])->group(fu
         ->as('admin.reservations')
         ->prefix('reservations')
         ->group(function () {
-            Route::put('/{reservation}/fulfill', 'fulfill')->name('.fulfill');
-            Route::put('/{reservation}/cancel', 'cancel')->name('.cancel');
+            Route::post('/{reservation}/fulfill', 'fulfill')->name('.fulfill');
+            Route::post('/{reservation}/cancel', 'cancel')->name('.cancel');
             Route::get('/', 'index')->name('.index');
         });
     // Dashboard
