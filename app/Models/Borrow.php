@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Laravel\Scout\Searchable;
 
+#[ObservedBy('App\Observers\BorrowObserver')]
 class Borrow extends Model
 {
     use HasFactory;
@@ -66,33 +68,4 @@ class Borrow extends Model
         return $query->active()
             ->where('due_date', '<', now());
     }
-
-    public function scopeForUser($query, $userId)
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    public function scopeFilter($query, array $filters): void
-    {
-        $query->when($filters['search'] ?? null, function ($query, $search) {
-            $query->where(function ($query) use ($search) {
-                $query->whereHas('book', function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%');
-                })
-                    ->orWhereHas('user', function ($query) use ($search) {
-                        $query->where('name', 'like', '%' . $search . '%');
-                    });
-            });
-        })
-            ->when($filters['status'] ?? null, function ($query, $status) {
-                if ($status === 'active') {
-                    $query->active();
-                } elseif ($status === 'overdue') {
-                    $query->overdue();
-                } elseif ($status === 'returned') {
-                    $query->whereNotNull('returned_at');
-                }
-            });
-    }
-
 }
