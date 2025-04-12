@@ -24,7 +24,6 @@ class AdminDashboardController extends Controller
             'borrowings' => $this->getBorrowingsChartData(),
             'genres' => $this->getPopularGenresData()
         ];
-
         $recentActivities = $this->getRecentActivities();
 
         return Inertia::render('Admin/Dashboard', [
