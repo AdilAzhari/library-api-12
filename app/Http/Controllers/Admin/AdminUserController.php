@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enum\UserRoles;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -18,10 +19,14 @@ class AdminUserController extends Controller
                     $query->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                 })
+                ->when(request('role'), function ($query, $role) {
+                    $query->where('role', $role);
+                })
                 ->latest()
                 ->paginate(10)
                 ->withQueryString(),
-            'filters' => request()->only(['search'])
+            'filters' => request()->only(['search', 'role']),
+            'roles' => UserRoles::values(),
         ]);
     }
 
