@@ -12,7 +12,8 @@ class Reservation extends Model
 
     protected $fillable = [
         'book_id', 'user_id', 'reserved_at',
-        'expires_at', 'fulfilled_by_borrow_id', 'canceled_at'
+        'expires_at', 'fulfilled_by_borrow_id', 'canceled_at',
+        'fulfilled_at'
     ];
 
     protected $casts = [
@@ -126,5 +127,10 @@ class Reservation extends Model
                     $query->whereNotNull('canceled_at');
                 }
             });
+    }
+
+    public function borrow(): BelongsTo
+    {
+        return $this->belongsTo(Borrow::class, 'fulfilled_by_borrow_id');
     }
 }
