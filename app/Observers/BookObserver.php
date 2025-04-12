@@ -44,4 +44,14 @@ class BookObserver
     {
         BookDeletedPermanently::dispatch($book);
     }
+
+    public function saved(Book $book): void
+    {
+        $book->searchable();
+    }
+
+    public function deleted(Book $book): void
+    {
+        $book->unsearchable();
+    }
 }

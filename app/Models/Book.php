@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Algolia\AlgoliaSearch\Model\Search\SearchResult;
 use App\Enum\BookStatus;
 use App\Observers\BookObserver;
 use App\States\AvailableState;
@@ -168,11 +167,9 @@ class Book extends Model
         ];
     }
 
-    public function getSearchResult(): SearchResult
+    public function searchableAs(): string
     {
-        return new SearchResult(
-            $this,
-        );
+        return 'books';
     }
 
     public function currentBorrow(): HasOne
@@ -205,6 +202,7 @@ class Book extends Model
             $model->unsearchable();
         });
     }
+
     public function hasPendingReservations(): bool
     {
         return $this->reservations()
