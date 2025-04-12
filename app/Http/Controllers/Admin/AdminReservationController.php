@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enum\BookStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Borrow;
@@ -77,7 +78,7 @@ class AdminReservationController extends Controller
         ]);
 
         // Update book status
-        $reservation->book->update(['status' => 'borrowed']);
+        $reservation->book->update(['status' => BookStatus::STATUS_AVAILABLE->value]);
 
         return back()->with('success', 'Reservation fulfilled successfully');
     }
