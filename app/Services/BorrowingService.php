@@ -82,14 +82,13 @@ class BorrowingService
     }
 
     public function getUserBorrows(
-        int     $userId,
+        int $userId,
         ?string $status = null,
-        string  $sortBy = 'due_date',
-        string  $sortOrder = 'asc',
-        int     $perPage = 10,
+        string $sortBy = 'due_date',
+        string $sortOrder = 'asc',
+        int $perPage = 10,
         ?string $search = null
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         $query = Borrow::with('book', 'user')
             ->where('user_id', $userId);
 
@@ -100,12 +99,11 @@ class BorrowingService
 
     public function getAllBorrows(
         ?string $status = null,
-        string  $sortBy = 'due_date',
-        string  $sortOrder = 'asc',
-        int     $perPage = 15,
+        string $sortBy = 'due_date',
+        string $sortOrder = 'asc',
+        int $perPage = 15,
         ?string $search = null
-    ): LengthAwarePaginator
-    {
+    ): LengthAwarePaginator {
         $query = Borrow::with(['book', 'user']);
 
         $this->applyFilters($query, $status, $sortBy, $sortOrder, $search);
@@ -131,7 +129,7 @@ class BorrowingService
     {
         return $borrow->returned_at === null
             && $borrow->renewal_count < config('library.max_renewals', 2)
-            && !$borrow->isOverdue();
+            && ! $borrow->isOverdue();
     }
 
     public function checkOverdueBooks(): void
@@ -148,7 +146,7 @@ class BorrowingService
      */
     protected function validateBorrow(Book $book, User $user): void
     {
-        if (!$book->is_available) {
+        if (! $book->is_available) {
             throw new Exception('This book is not currently available for borrowing');
         }
 
@@ -161,7 +159,7 @@ class BorrowingService
             throw new Exception('You have reached the maximum number of borrowed books');
         }
 
-        if (!$user->is_admin && !$this->hasActiveReservation($user->id, $book->id)) {
+        if (! $user->is_admin && ! $this->hasActiveReservation($user->id, $book->id)) {
             throw new Exception('You need an active reservation to borrow this book');
         }
     }
@@ -182,7 +180,7 @@ class BorrowingService
         if ($borrow->isOverdue()) {
             throw new Exception('Cannot renew an overdue book');
         }
-        if (!$borrow->book->canBeRenewed()) {
+        if (! $borrow->book->canBeRenewed()) {
             throw new \Exception('This book cannot be renewed at this time');
         }
     }
@@ -194,6 +192,7 @@ class BorrowingService
 
         if ($borrow->due_date->addDays($gracePeriod)->lt($returnDate)) {
             $daysLate = $borrow->due_date->diffInDays($returnDate) - $gracePeriod;
+
             return max(0, $daysLate) * config('library.daily_late_fee', 0.50);
         }
 
@@ -205,7 +204,7 @@ class BorrowingService
         Reservation::activeForUser($userId, $bookId)
             ->first()?->update([
                 'fulfilled_by_borrow_id' => $borrowId,
-                'expires_at' => now()
+                'expires_at' => now(),
             ]);
     }
 
@@ -244,16 +243,16 @@ class BorrowingService
         // Apply sorting
         $validSorts = [
             'borrowed_at', 'due_date', 'returned_at',
-            'book.title', 'book.author', 'user.name'
+            'book.title', 'book.author', 'user.name',
         ];
 
-        if (!in_array($sortBy, $validSorts)) {
+        if (! in_array($sortBy, $validSorts)) {
             $sortBy = 'due_date';
         }
 
         if (str_contains($sortBy, '.')) {
             [$relation, $column] = explode('.', $sortBy);
-            $query->join($relation . 's', 'borrows.book_id', '=', $relation . 's.id')
+            $query->join($relation.'s', 'borrows.book_id', '=', $relation.'s.id')
                 ->orderBy("$relation.$column", $sortOrder)
                 ->select('borrows.*');
         } else {

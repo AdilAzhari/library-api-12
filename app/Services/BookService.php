@@ -19,13 +19,12 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class BookService
 {
     public function getAllBooks(array $filters, int $perPage): LengthAwarePaginator
     {
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             return $this->searchWithTypesense($filters, $perPage);
         }
 
@@ -52,7 +51,7 @@ class BookService
         return Cache::remember(
             $this->getSearchCacheKey($filters, $perPage),
             now()->addMinutes(30), // Cache for 30 minutes
-            fn() => $searchQuery->paginate($perPage)
+            fn () => $searchQuery->paginate($perPage)
         );
     }
 
@@ -61,9 +60,9 @@ class BookService
         return Book::with('genre', 'reviews', 'activeReservation')
             ->withCount('reviews')
             ->withAvg('reviews', 'rating')
-            ->when($filters['genre'] ?? null, fn($q, $genre) => $q->where('genre_id', $genre))
-            ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
-            ->when($filters['sort'] ?? null, fn($q, $sort) => $this->applySorting($q, $sort))
+            ->when($filters['genre'] ?? null, fn ($q, $genre) => $q->where('genre_id', $genre))
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($filters['sort'] ?? null, fn ($q, $sort) => $this->applySorting($q, $sort))
             ->latest()
             ->paginate($perPage);
     }
@@ -80,9 +79,9 @@ class BookService
                         ->orWhere('ISBN', 'like', "%$search%");
                 });
             })
-            ->when($filters['genre'] ?? null, fn($q, $genre) => $q->where('genre_id', $genre))
-            ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
-            ->when($filters['sort'] ?? null, fn($q, $sort) => $this->applySorting($q, $sort))
+            ->when($filters['genre'] ?? null, fn ($q, $genre) => $q->where('genre_id', $genre))
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($filters['sort'] ?? null, fn ($q, $sort) => $this->applySorting($q, $sort))
             ->latest()
             ->paginate($perPage);
     }
@@ -95,7 +94,7 @@ class BookService
         ]);
 
         return collect($filters)
-            ->map(fn($value, $key) => "$key:=$value")
+            ->map(fn ($value, $key) => "$key:=$value")
             ->join(' && ');
     }
 
@@ -132,7 +131,7 @@ class BookService
 
     private function getSearchCacheKey(array $filters, int $perPage): string
     {
-        return 'books_search_' . md5(serialize($filters)) . '_' . $perPage;
+        return 'books_search_'.md5(serialize($filters)).'_'.$perPage;
     }
 
     public function createBook(BookCreateDTO $dto): Book
@@ -143,6 +142,7 @@ class BookService
     public function updateBook(Book $book, BookUpdateDTO $dto): Book
     {
         $book->update($dto->toArray());
+
         return $book;
     }
 
@@ -179,7 +179,7 @@ class BookService
             }
 
             // Check book availability
-            if (!$book->canBeReserved()) {
+            if (! $book->canBeReserved()) {
                 throw new BookNotAvailableException('This book cannot be reserved at this time');
             }
 
@@ -205,8 +205,6 @@ class BookService
     /**
      * Borrow a book by fulfilling a reservation
      *
-     * @param BorrowBookDTO $dto
-     * @return Borrow
      * @throws Exception
      */
     public function borrowBook(BorrowBookDTO $dto): Borrow
@@ -237,7 +235,7 @@ class BookService
             // 1. Book is available OR
             // 2. User has a reservation OR
             // 3. Book is reserved but reservation is expired
-            if (!$book->canBeBorrowed() && !$reservation) {
+            if (! $book->canBeBorrowed() && ! $reservation) {
                 throw new BookNotAvailableException('This book is not available for borrowing');
             }
 
@@ -254,13 +252,13 @@ class BookService
             if ($reservation) {
                 $reservation->update([
                     'fulfilled_by_borrow_id' => $borrowing->id,
-                    'expires_at' => now() // Mark as fulfilled
+                    'expires_at' => now(), // Mark as fulfilled
                 ]);
             }
 
             // Update book status
             $book->update([
-                'status' => BookStatus::STATUS_BORROWED->value
+                'status' => BookStatus::STATUS_BORROWED->value,
             ]);
 
             event(new BookBorrowed($borrowing));

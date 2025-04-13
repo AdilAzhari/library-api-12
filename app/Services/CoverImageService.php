@@ -18,7 +18,7 @@ class CoverImageService
 
     public function update(?UploadedFile $file, ?string $oldPath, string $title, string $author, int $year): ?string
     {
-        if (!$file) {
+        if (! $file) {
             return $oldPath;
         }
 
@@ -33,12 +33,12 @@ class CoverImageService
     public function delete(?string $path): void
     {
         if ($path) {
-            Storage::delete('public/' . $path);
+            Storage::delete('public/'.$path);
         }
     }
 
     protected function generateFilename(UploadedFile $file, string $title, string $author, int $year): string
     {
-        return Str::slug("$title-$author-$year") . '.' . $file->getClientOriginalExtension();
+        return Str::slug("$title-$author-$year").'.'.$file->getClientOriginalExtension();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Stichoza\GoogleTranslate\Exceptions\LargeTextException;
@@ -8,9 +9,7 @@ use Stichoza\GoogleTranslate\GoogleTranslate;
 
 class TranslationService
 {
-    public function __construct(protected GoogleTranslate $translator)
-    {
-    }
+    public function __construct(protected GoogleTranslate $translator) {}
 
     /**
      * @throws LargeTextException
@@ -20,6 +19,7 @@ class TranslationService
     public function translate(string $text, string $targetLanguage): string
     {
         $this->translator->setSource('en')->setTarget($targetLanguage);
+
         return $this->translator->translate($text);
     }
 }

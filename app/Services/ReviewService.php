@@ -3,9 +3,8 @@
 namespace App\Services;
 
 use App\DTO\ReviewBookDTO;
-use App\Models\Review;
 use App\Models\Book;
-use App\Models\User;
+use App\Models\Review;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -36,8 +35,8 @@ class ReviewService
 
             return $review;
         } catch (Exception $e) {
-            Log::error('Error submitting review: ' . $e->getMessage());
-            throw new Exception('Failed to submit review: ' . $e->getMessage()); // Include the actual error message
+            Log::error('Error submitting review: '.$e->getMessage());
+            throw new Exception('Failed to submit review: '.$e->getMessage()); // Include the actual error message
         }
     }
 
@@ -75,7 +74,7 @@ class ReviewService
         try {
             return Review::with(['book', 'user'])->findOrFail($reviewId);
         } catch (Exception $e) {
-            Log::error('Error fetching review: ' . $e->getMessage());
+            Log::error('Error fetching review: '.$e->getMessage());
             throw new Exception('Failed to fetch review. Please try again.');
         }
     }
@@ -95,7 +94,7 @@ class ReviewService
             // Update the book's average rating after deletion
             $this->updateBookRating($bookId);
         } catch (Exception $e) {
-            Log::error('Error deleting review: ' . $e->getMessage());
+            Log::error('Error deleting review: '.$e->getMessage());
             throw new Exception('Failed to delete review. Please try again.');
         }
     }

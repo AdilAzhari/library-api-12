@@ -23,8 +23,9 @@ class ReservationService
     /**
      * Reserve a book.
      *
-     * @param ReserveBookDTO $dto The DTO containing reservation details.
+     * @param  ReserveBookDTO  $dto  The DTO containing reservation details.
      * @return Reservation The created reservation.
+     *
      * @throws Exception If the reservation fails to be created.
      */
     public function reserveBook(ReserveBookDTO $dto): Reservation
@@ -37,7 +38,7 @@ class ReservationService
                 'fulfilled_at' => null,
             ]);
         } catch (Exception $e) {
-            Log::error('Error reserving book: ' . $e->getMessage());
+            Log::error('Error reserving book: '.$e->getMessage());
             throw new Exception('Failed to reserve book. Please try again.');
         }
     }
@@ -79,7 +80,7 @@ class ReservationService
         try {
             return Reservation::with(['book', 'user'])->findOrFail($reservationId);
         } catch (Exception $e) {
-            Log::error('Error fetching reservation: ' . $e->getMessage());
+            Log::error('Error fetching reservation: '.$e->getMessage());
             throw new Exception('Failed to fetch reservation. Please try again.');
         }
     }
@@ -94,9 +95,10 @@ class ReservationService
         try {
             $reservation = Reservation::query()->findOrFail($reservationId);
             $reservation->update($data);
+
             return $reservation;
         } catch (Exception $e) {
-            Log::error('Error updating reservation: ' . $e->getMessage());
+            Log::error('Error updating reservation: '.$e->getMessage());
             throw new Exception('Failed to update reservation. Please try again.');
         }
     }
@@ -112,7 +114,7 @@ class ReservationService
             $reservation = Reservation::query()->findOrFail($reservationId);
             $reservation->delete();
         } catch (Exception $e) {
-            Log::error('Error deleting reservation: ' . $e->getMessage());
+            Log::error('Error deleting reservation: '.$e->getMessage());
             throw new Exception('Failed to delete reservation. Please try again.');
         }
     }
@@ -120,22 +122,15 @@ class ReservationService
     /**
      * Get paginated list of reservations for a specific user with filtering and sorting
      *
-     * @param int $userId
-     * @param array $filters
-     * @param string $sortBy
-     * @param string $sortOrder
-     * @param int $perPage
-     * @return LengthAwarePaginator
      * @throws Exception
      */
     public function getUserReservations(
-        int    $userId,
-        array  $filters = [],
+        int $userId,
+        array $filters = [],
         string $sortBy = 'reserved_at',
         string $sortOrder = 'desc',
-        int    $perPage = 10
-    ): LengthAwarePaginator
-    {
+        int $perPage = 10
+    ): LengthAwarePaginator {
         try {
             $query = Reservation::with(['book', 'borrowing'])
                 ->where('user_id', $userId)
@@ -173,7 +168,7 @@ class ReservationService
             return $query->paginate($perPage);
 
         } catch (Exception $e) {
-            Log::error("Failed to fetch user reservations: " . $e->getMessage());
+            Log::error('Failed to fetch user reservations: '.$e->getMessage());
             throw new Exception('Failed to retrieve reservations. Please try again.');
         }
     }
@@ -181,8 +176,6 @@ class ReservationService
     /**
      * Create a new book reservation
      *
-     * @param ReserveBookDTO $dto
-     * @return Reservation
      * @throws Exception
      */
     public function createReservation(ReserveBookDTO $dto): Reservation
@@ -193,7 +186,7 @@ class ReservationService
                 $user = User::Query()->findOrFail($dto->userId);
 
                 // Check book availability
-                if (!$book->isAvailable()) {
+                if (! $book->isAvailable()) {
                     throw new Exception('This book is not currently available for reservation.');
                 }
 
@@ -218,8 +211,8 @@ class ReservationService
                 return $reservation->load('book');
 
             } catch (Exception $e) {
-                Log::error("Reservation creation failed: " . $e->getMessage());
-                throw new Exception('Could not create reservation. ' . $e->getMessage());
+                Log::error('Reservation creation failed: '.$e->getMessage());
+                throw new Exception('Could not create reservation. '.$e->getMessage());
             }
         });
     }
@@ -227,9 +220,6 @@ class ReservationService
     /**
      * Cancel an existing reservation
      *
-     * @param int $reservationId
-     * @param int $userId
-     * @return void
      * @throws Exception
      */
     public function cancelReservation(int $reservationId, int $userId): void
@@ -256,8 +246,8 @@ class ReservationService
                 event(new ReservationCancelled($reservation));
 
             } catch (Exception $e) {
-                Log::error("Reservation cancellation failed: " . $e->getMessage());
-                throw new Exception('Could not cancel reservation. ' . $e->getMessage());
+                Log::error('Reservation cancellation failed: '.$e->getMessage());
+                throw new Exception('Could not cancel reservation. '.$e->getMessage());
             }
         });
     }
