@@ -13,12 +13,12 @@
             <!-- Charts -->
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div class="bg-white p-6 rounded-lg shadow">
-                    <h2 class="text-lg font-medium text-gray-900 mb-4">Borrowings This Month</h2>
-                    <BorrowingsChart :data="charts.borrowings"/>
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">Borrowings Last 6 Months</h2>
+                    <BorrowingsChart :data="charts.borrowings || {}"/>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h2 class="text-lg font-medium text-gray-900 mb-4">Popular Genres</h2>
-                    <GenresChart :data="charts.genres"/>
+                    <GenresChart :data="charts.genres || []"/>
                 </div>
             </div>
 
@@ -37,10 +37,23 @@ import StatsCard from '@/Components/Admin/StatsCard.vue';
 import BorrowingsChart from '@/Components/Admin/Charts/BorrowingsChart.vue';
 import GenresChart from '@/Components/Admin/Charts/GenresChart.vue';
 import ActivityFeed from '@/Components/Admin/ActivityFeed.vue';
+import {onMounted} from 'vue';
 
 defineProps({
-    stats: Object,
-    charts: Object,
-    recentActivities: Array
+    stats: {
+        type: Object,
+        required: true
+    },
+    charts: {
+        type: Object,
+        required: true
+    },
+    recentActivities: {
+        type: Array,
+        required: true
+    }
+});
+onMounted(() => {
+    console.log('Charts data:', props.charts);
 });
 </script>
