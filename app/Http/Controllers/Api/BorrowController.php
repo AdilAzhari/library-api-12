@@ -15,9 +15,7 @@ class BorrowController extends Controller
 {
     use ApiMessages;
 
-    public function __construct(protected BorrowingService $borrowingService)
-    {
-    }
+    public function __construct(protected BorrowingService $borrowingService) {}
 
     public function borrowBook(Request $request)
     {
@@ -31,7 +29,8 @@ class BorrowController extends Controller
 
             return $this->successResponse('Book borrowed successfully', $borrowing, 201);
         } catch (Exception $e) {
-            Log::error('Error borrowing book: ' . $e->getMessage());
+            Log::error('Error borrowing book: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while borrowing the book.');
         }
     }
@@ -48,9 +47,9 @@ class BorrowController extends Controller
 
             return $this->successResponse('Book returned successfully', $borrowing);
         } catch (Exception $e) {
-            Log::error('Error returning book: ' . $e->getMessage());
+            Log::error('Error returning book: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while returning the book.');
         }
     }
-
 }

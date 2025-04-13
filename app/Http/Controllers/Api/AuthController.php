@@ -17,9 +17,6 @@ class AuthController extends Controller
 {
     /**
      * Register a new user.
-     *
-     * @param RegisterRequest $request
-     * @return JsonResponse
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -38,21 +35,19 @@ class AuthController extends Controller
                 'token' => $token,
             ], 201);
         } catch (Exception $e) {
-            Log::error('Error during registration: ' . $e->getMessage());
+            Log::error('Error during registration: '.$e->getMessage());
+
             return response()->json(['error' => 'An error occurred during registration.'], 500);
         }
     }
 
     /**
      * Authenticate a user and return a token.
-     *
-     * @param LoginRequest $request
-     * @return JsonResponse
      */
     public function login(LoginRequest $request): JsonResponse
     {
         try {
-            if (!Auth::attempt($request->only('email', 'password'))) {
+            if (! Auth::attempt($request->only('email', 'password'))) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
 
@@ -65,16 +60,14 @@ class AuthController extends Controller
                 'token' => $token,
             ]);
         } catch (Exception $e) {
-            Log::error('Error during login: ' . $e->getMessage());
+            Log::error('Error during login: '.$e->getMessage());
+
             return response()->json(['error' => 'An error occurred during login.'], 500);
         }
     }
 
     /**
      * Revoke the user's token (logout).
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
@@ -83,7 +76,8 @@ class AuthController extends Controller
 
             return response()->json(['message' => 'User logged out successfully']);
         } catch (Exception $e) {
-            Log::error('Error during logout: ' . $e->getMessage());
+            Log::error('Error during logout: '.$e->getMessage());
+
             return response()->json(['error' => 'An error occurred during logout.'], 500);
         }
     }

@@ -14,9 +14,7 @@ class ReservationController extends Controller
 {
     use ApiMessages;
 
-    public function __construct(protected ReservationService $reservationService)
-    {
-    }
+    public function __construct(protected ReservationService $reservationService) {}
 
     public function reserveBook(Request $request)
     {
@@ -32,7 +30,8 @@ class ReservationController extends Controller
 
             return $this->successResponse('Book reserved successfully', $reservation, 201);
         } catch (Exception $e) {
-            Log::error('Error reserving book: ' . $e->getMessage());
+            Log::error('Error reserving book: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while reserving the book.');
         }
     }
@@ -41,9 +40,11 @@ class ReservationController extends Controller
     {
         try {
             $reservations = $this->reservationService->listReservations();
+
             return $this->successResponse('Reservations retrieved successfully', $reservations);
         } catch (Exception $e) {
-            Log::error('Error listing reservations: ' . $e->getMessage());
+            Log::error('Error listing reservations: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while listing reservations.');
         }
     }

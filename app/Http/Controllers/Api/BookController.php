@@ -8,9 +8,9 @@ use App\DTO\BookUpdateDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreBookRequest;
 use App\Models\Book;
+use App\Services\BookExportService;
 use App\Services\BookService;
 use App\Services\GoogleBooksService;
-use App\Services\BookExportService;
 use App\Services\TranslationService;
 use App\Traits\ApiMessages;
 use Exception;
@@ -27,27 +27,26 @@ class BookController extends Controller
     use ApiMessages;
 
     public function __construct(
-        protected BookService        $bookService,
+        protected BookService $bookService,
         protected GoogleBooksService $googleBooksService,
-        protected BookExportService  $bookExportService,
+        protected BookExportService $bookExportService,
         protected TranslationService $translationService
-    )
-    {
-    }
+    ) {}
 
     public function index(Request $request)
     {
         $locale = $request->header('Accept-Language', 'en');
 
-        if (!in_array($locale, ['en', 'ar'])) {
+        if (! in_array($locale, ['en', 'ar'])) {
             $locale = 'en';
         }
         App::setLocale($locale);
 
-        $cacheKey = 'books_' . md5(serialize($request->all()));
-//        $books = Cache::remember($cacheKey, 600, function () use ($request) {
-            return $this->bookService->getAllBooks($request->all(), $request->input('per_page', 10));
-//        });
+        $cacheKey = 'books_'.md5(serialize($request->all()));
+
+        //        $books = Cache::remember($cacheKey, 600, function () use ($request) {
+        return $this->bookService->getAllBooks($request->all(), $request->input('per_page', 10));
+        //        });
 
         return $this->successResponse('Books retrieved successfully', $books);
     }
@@ -62,7 +61,8 @@ class BookController extends Controller
 
             return $this->successResponse('Book created successfully', [], 201);
         } catch (Exception $e) {
-            Log::error('Error creating book: ' . $e->getMessage());
+            Log::error('Error creating book: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while creating the book.');
         }
     }
@@ -80,6 +80,7 @@ class BookController extends Controller
             $book->title = $this->translationService->translate($book->title, $locale);
             $book->description = $this->translationService->translate($book->description, $locale);
         }
+
         return $this->successResponse('Book retrieved successfully', $book);
     }
 
@@ -89,7 +90,7 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'publication_year' => 'required|digits:4|integer|min:1900|max:' . now()->format('Y'),
+            'publication_year' => 'required|digits:4|integer|min:1900|max:'.now()->format('Y'),
             'cover_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048|nullable',
             'genre_id' => 'required|integer|exists:genres,id|nullable',
         ]);
@@ -101,7 +102,8 @@ class BookController extends Controller
 
             return $this->successResponse('Book updated successfully');
         } catch (Exception $e) {
-            Log::error('Error updating book: ' . $e->getMessage());
+            Log::error('Error updating book: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while updating the book.');
         }
     }
@@ -114,7 +116,8 @@ class BookController extends Controller
 
             return $this->successResponse('Book moved to trash');
         } catch (Exception $e) {
-            Log::error('Error deleting book: ' . $e->getMessage());
+            Log::error('Error deleting book: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while deleting the book.');
         }
     }
@@ -122,6 +125,7 @@ class BookController extends Controller
     public function restore($id)
     {
         $book = $this->bookService->restoreBook($id);
+
         return $this->successResponse('Book restored successfully');
     }
 
@@ -133,12 +137,14 @@ class BookController extends Controller
     public function fetchFromGoogleBooks(Request $request)
     {
         $results = $this->googleBooksService->searchBooks($request->input('query'));
+
         return $this->successResponse('Books fetched from Google Books', $results);
     }
 
     public function recommend(Book $book)
     {
         $relatedBooks = $this->bookService->recommendBooks($book);
+
         return $this->successResponse('Recommended books retrieved successfully', $relatedBooks);
     }
 

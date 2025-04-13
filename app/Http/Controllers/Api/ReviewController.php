@@ -14,9 +14,7 @@ class ReviewController extends Controller
 {
     use ApiMessages;
 
-    public function __construct(protected ReviewService $reviewService)
-    {
-    }
+    public function __construct(protected ReviewService $reviewService) {}
 
     public function reviewBook(Request $request)
     {
@@ -32,7 +30,8 @@ class ReviewController extends Controller
 
             return $this->successResponse('Review submitted successfully', $review, 201);
         } catch (Exception $e) {
-            Log::error('Error submitting review: ' . $e->getMessage());
+            Log::error('Error submitting review: '.$e->getMessage());
+
             return $this->serverErrorResponse('An error occurred while submitting the review.');
         }
     }
