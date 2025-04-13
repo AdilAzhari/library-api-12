@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Http\Controllers\Api\Reservation;
 use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\Genre;
 use App\Models\User;
-
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -76,7 +74,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'member',
             'email' => 'member@example.com',
-            'role' => 'member'
+            'role' => 'member',
         ]);
 
         $this->call([
