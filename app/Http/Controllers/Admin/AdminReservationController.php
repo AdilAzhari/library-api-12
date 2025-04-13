@@ -1,11 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
 use App\Enum\BookStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
 use App\Models\Borrow;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -54,12 +56,12 @@ class AdminReservationController extends Controller
                         'is_fulfilled' => $reservation->isFulfilled(),
                         'is_canceled' => $reservation->isCanceled(),
                         'is_expired' => $reservation->isExpired(),
-                        'is_active' => !$reservation->isFulfilled() &&
-                            !$reservation->isCanceled() &&
-                            $reservation->expires_at > now()
+                        'is_active' => ! $reservation->isFulfilled() &&
+                            ! $reservation->isCanceled() &&
+                            $reservation->expires_at > now(),
                     ];
                 }),
-            'filters' => request()->only(['search', 'status'])
+            'filters' => request()->only(['search', 'status']),
         ]);
     }
 
@@ -74,7 +76,7 @@ class AdminReservationController extends Controller
 
         $reservation->update([
             'fulfilled_by_borrow_id' => $borrowing->id,
-            'fulfilled_at' => now()
+            'fulfilled_at' => now(),
         ]);
 
         // Update book status
@@ -86,7 +88,7 @@ class AdminReservationController extends Controller
     public function cancel(Reservation $reservation)
     {
         $reservation->update([
-            'canceled_at' => now()
+            'canceled_at' => now(),
         ]);
 
         // Update book status if it was reserved

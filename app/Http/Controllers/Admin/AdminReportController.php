@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
@@ -54,13 +56,13 @@ class AdminReportController extends Controller
             'reportData' => [
                 'chart' => $chartData,
                 'topBooks' => $topBooks,
-                'borrowings' => $borrowings
+                'borrowings' => $borrowings,
             ],
             'filters' => [
                 'date_range' => $dateRange,
                 'start_date' => $startDate->format('Y-m-d'),
-                'end_date' => $endDate->format('Y-m-d')
-            ]
+                'end_date' => $endDate->format('Y-m-d'),
+            ],
         ]);
     }
 
@@ -72,7 +74,7 @@ class AdminReportController extends Controller
             ->paginate(20);
 
         return Inertia::render('Admin/Reports/Overdue', [
-            'borrowings' => $overdueBorrowings
+            'borrowings' => $overdueBorrowings,
         ]);
     }
 
@@ -113,14 +115,14 @@ class AdminReportController extends Controller
                 [
                     'label' => 'Borrowings',
                     'data' => $borrowingsData,
-                    'backgroundColor' => '#2c3e50'
+                    'backgroundColor' => '#2c3e50',
                 ],
                 [
                     'label' => 'Returns',
                     'data' => $returnsData,
-                    'backgroundColor' => '#3498db'
-                ]
-            ]
+                    'backgroundColor' => '#3498db',
+                ],
+            ],
         ];
     }
 
@@ -137,7 +139,7 @@ class AdminReportController extends Controller
                 return [
                     'title' => $item->book->title,
                     'author' => $item->book->author,
-                    'borrow_count' => $item->borrow_count
+                    'borrow_count' => $item->borrow_count,
                 ];
             });
     }
@@ -155,11 +157,11 @@ class AdminReportController extends Controller
         $filename = "borrowings_report_{$startDate->format('Y-m-d')}_to_{$endDate->format('Y-m-d')}.csv";
 
         $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
         $callback = function () use ($borrowings) {
@@ -174,7 +176,7 @@ class AdminReportController extends Controller
                 'Borrowed Date',
                 'Due Date',
                 'Returned Date',
-                'Status'
+                'Status',
             ]);
 
             // Data rows
@@ -187,7 +189,7 @@ class AdminReportController extends Controller
                     $borrowing->borrowed_at->format('Y-m-d'),
                     $borrowing->due_date->format('Y-m-d'),
                     $borrowing->returned_at?->format('Y-m-d') ?? '',
-                    $borrowing->status
+                    $borrowing->status,
                 ]);
             }
 
@@ -210,7 +212,7 @@ class AdminReportController extends Controller
         $pdf = PDF::loadView('admin.reports.borrowings_pdf', [
             'borrowings' => $borrowings,
             'startDate' => $startDate,
-            'endDate' => $endDate
+            'endDate' => $endDate,
         ]);
 
         $filename = "borrowings_report_{$startDate->format('Y-m-d')}_to_{$endDate->format('Y-m-d')}.pdf";

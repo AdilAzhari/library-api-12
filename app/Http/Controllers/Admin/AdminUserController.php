@@ -71,7 +71,7 @@ class AdminUserController extends Controller
             request()->validate([
                 'name' => 'required',
                 'email' => 'required|email',
-                'role' => 'required'
+                'role' => 'required',
             ])
         );
 

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
@@ -61,18 +63,17 @@ class AdminBorrowingController extends Controller
                     'is_overdue' => $borrowing->isOverdue(),
                     'status' => $borrowing->returned_at
                         ? 'returned'
-                        : ($borrowing->isOverdue() ? 'overdue' : 'active')
+                        : ($borrowing->isOverdue() ? 'overdue' : 'active'),
                 ];
             });
 
         return Inertia::render('Admin/Borrowings/Index', [
             'borrowings' => $borrowings,
-            'filters' => request()->all('search', 'status')
+            'filters' => request()->all('search', 'status'),
         ]);
     }
 
-    public
-    function store(StoreBorrowRequest $request)
+    public function store(StoreBorrowRequest $request)
     {
         $borrowing = Borrow::create([
             'book_id' => $request->book_id,
@@ -88,8 +89,7 @@ class AdminBorrowingController extends Controller
             ->with('success', 'Book checked out successfully');
     }
 
-    public
-    function create()
+    public function create()
     {
         $searchQuery = request()->input('search');
 
@@ -100,15 +100,14 @@ class AdminBorrowingController extends Controller
         return Inertia::render('Admin/Borrowings/Create', [
             'availableBooks' => $availableBooks,
             'users' => User::all(),
-            'filters' => request()->only('search')
+            'filters' => request()->only('search'),
         ]);
     }
 
-    public
-    function markReturned(Borrow $borrowing)
+    public function markReturned(Borrow $borrowing)
     {
         $borrowing->update([
-            'returned_at' => now()
+            'returned_at' => now(),
         ]);
 
         // Update book status
@@ -117,23 +116,21 @@ class AdminBorrowingController extends Controller
         return back()->with('success', 'Book marked as returned');
     }
 
-    public
-    function renew(Borrow $borrowing)
+    public function renew(Borrow $borrowing)
     {
         $newDueDate = Carbon::parse($borrowing->due_date)->addWeeks(2);
 
         $borrowing->update([
             'due_date' => $newDueDate,
-            'renewal_count' => $borrowing->renewal_count + 1
+            'renewal_count' => $borrowing->renewal_count + 1,
         ]);
 
         return back()->with('success', 'Borrowing renewed successfully');
     }
 
-    public
-    function destroy(Borrow $borrowing)
+    public function destroy(Borrow $borrowing)
     {
-        if (!$borrowing->returned_at) {
+        if (! $borrowing->returned_at) {
             $borrowing->book->update(['status' => 'available']);
         }
 
@@ -142,8 +139,7 @@ class AdminBorrowingController extends Controller
         return back()->with('success', 'Borrowing record deleted');
     }
 
-    public
-    function return(Borrow $borrowing)
+    public function return(Borrow $borrowing)
     {
         $borrowing->update(['returned_at' => now()]);
 
@@ -174,16 +170,16 @@ class AdminBorrowingController extends Controller
                     : ($borrowing->isOverdue() ? 'overdue' : 'active'),
                 'late_fee' => $borrowing->late_fee,
                 'renewal_count' => $borrowing->renewal_count,
-                'notes' => $borrowing->notes
+                'notes' => $borrowing->notes,
             ],
             'borrowHistory' => $borrowing->book->borrows()
                 ->with('user')
                 ->where('id', '!=', $borrowing->id)
                 ->latest()
                 ->paginate(5),
-            'canRenew' => !$borrowing->returned_at &&
+            'canRenew' => ! $borrowing->returned_at &&
                 $borrowing->renewal_count < config('library.max_renewals') &&
-                !$borrowing->isOverdue()
+                ! $borrowing->isOverdue(),
         ]);
     }
 }

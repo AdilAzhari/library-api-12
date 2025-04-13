@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
@@ -15,7 +17,7 @@ class AdminBookController extends Controller
     {
         return Inertia::render('Admin/Books/Index', [
             'books' => Book::query()
-                ->with(['genre','activeReservation'])
+                ->with(['genre', 'activeReservation'])
                 ->when(request('search'), function ($query, $search) {
                     $query->where('title', 'like', "%$search%")
                         ->orWhere('author', 'like', "%$search%")
@@ -26,14 +28,14 @@ class AdminBookController extends Controller
                 })
                 ->paginate(10)
                 ->withQueryString(),
-            'filters' => request()->only(['search', 'status'])
+            'filters' => request()->only(['search', 'status']),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Admin/Books/Form', [
-            'genres' => Genre::all()
+            'genres' => Genre::all(),
         ]);
     }
 
@@ -49,7 +51,7 @@ class AdminBookController extends Controller
     {
         return Inertia::render('Admin/Books/Form', [
             'book' => $book->load('genre'),
-            'genres' => Genre::all()
+            'genres' => Genre::all(),
         ]);
     }
 

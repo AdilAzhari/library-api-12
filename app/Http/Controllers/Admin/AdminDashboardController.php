@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
@@ -22,14 +24,15 @@ class AdminDashboardController extends Controller
 
         $charts = [
             'borrowings' => $this->getBorrowingsChartData(),
-            'genres' => $this->getPopularGenresData()
+            'genres' => $this->getPopularGenresData(),
         ];
+
         $recentActivities = $this->getRecentActivities();
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => $stats,
             'charts' => $charts,
-            'recentActivities' => $recentActivities
+            'recentActivities' => $recentActivities,
         ]);
     }
 
@@ -72,14 +75,14 @@ class AdminDashboardController extends Controller
                 [
                     'label' => 'Borrowings',
                     'data' => $borrowings,
-                    'backgroundColor' => '#2c3e50'
+                    'backgroundColor' => '#2c3e50',
                 ],
                 [
                     'label' => 'Returns',
                     'data' => $returns,
-                    'backgroundColor' => '#3498db'
-                ]
-            ]
+                    'backgroundColor' => '#3498db',
+                ],
+            ],
         ];
     }
 
@@ -94,10 +97,11 @@ class AdminDashboardController extends Controller
             ->map(function ($books, $genre) {
                 return [
                     'name' => $genre ?: 'Uncategorized',
-                    'count' => $books->sum('borrows_count')
+                    'count' => $books->sum('borrows_count'),
                 ];
             })
             ->values()
+            ->filter()
             ->toArray();
     }
 
@@ -119,7 +123,7 @@ class AdminDashboardController extends Controller
                         : $borrowing->borrowed_at->toISOString(),
                     'time' => $borrowing->returned_at
                         ? $borrowing->returned_at->diffForHumans()
-                        : $borrowing->borrowed_at->diffForHumans()
+                        : $borrowing->borrowed_at->diffForHumans(),
                 ];
             });
 
@@ -129,7 +133,7 @@ class AdminDashboardController extends Controller
             ->get()
             ->map(function ($reservation) {
                 return [
-                    'type' => 'book',
+                    'type' => 'reservation',
                     'description' => $reservation->isFulfilled()
                         ? 'Fulfilled reservation'
                         : ($reservation->isCanceled()
@@ -137,7 +141,7 @@ class AdminDashboardController extends Controller
                             : 'Created reservation'),
                     'user' => $reservation->user->name,
                     'datetime' => $reservation->updated_at->toISOString(),
-                    'time' => $reservation->updated_at->diffForHumans()
+                    'time' => $reservation->updated_at->diffForHumans(),
                 ];
             });
 
@@ -150,11 +154,11 @@ class AdminDashboardController extends Controller
                     'description' => 'Registered',
                     'user' => $user->name,
                     'datetime' => $user->created_at->toISOString(),
-                    'time' => $user->created_at->diffForHumans()
+                    'time' => $user->created_at->diffForHumans(),
                 ];
             });
 
-        return $borrowings->concat($reservations)->concat((array)$users)
+        return $borrowings->concat($reservations)->concat($users)
             ->sortByDesc('datetime')
             ->values()
             ->take(8)
