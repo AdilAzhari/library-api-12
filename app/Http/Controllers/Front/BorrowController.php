@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Front;
 use App\DTO\BorrowBookDTO;
 use App\DTO\ReturnBookDTO;
 use App\Http\Controllers\Controller;
-use App\Models\Book;
 use App\Services\BorrowingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,9 +17,7 @@ class BorrowController extends Controller
 {
     public function __construct(
         protected BorrowingService $borrowingService
-    )
-    {
-    }
+    ) {}
 
     public function index(Request $request): Response|RedirectResponse
     {
@@ -38,6 +35,7 @@ class BorrowController extends Controller
                 ? $this->borrowingService->getAllBorrows($status, $sortBy, $sortOrder, $perPage, $search)
                 : $this->borrowingService->getUserBorrows($user->id, $status, $sortBy, $sortOrder, $perPage, $search);
             $borrows->all();
+
             return Inertia::render('Borrow/Index', [
                 'borrowings' => $borrows->load('book.genre', 'user', 'book.activeReservation'),
                 'filters' => [
@@ -53,7 +51,7 @@ class BorrowController extends Controller
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->with('error', 'Failed to load borrowings: ' . $e->getMessage());
+                ->with('error', 'Failed to load borrowings: '.$e->getMessage());
         }
     }
 
@@ -75,7 +73,7 @@ class BorrowController extends Controller
         } catch (\Exception $e) {
             return redirect()
                 ->route('borrows.index')
-                ->with('error', 'Failed to load borrowing details: ' . $e->getMessage());
+                ->with('error', 'Failed to load borrowing details: '.$e->getMessage());
         }
     }
 
@@ -93,13 +91,13 @@ class BorrowController extends Controller
 
             return redirect()
                 ->route('borrows.index')
-                ->with('success', 'Book borrowed successfully. Due on ' .
+                ->with('success', 'Book borrowed successfully. Due on '.
                     $borrow->due_date->format('M j, Y'));
 
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->with('error', 'Borrowing failed: ' . $e->getMessage());
+                ->with('error', 'Borrowing failed: '.$e->getMessage());
         }
     }
 
@@ -113,13 +111,13 @@ class BorrowController extends Controller
 
             return redirect()
                 ->back()
-                ->with('success', 'Borrowing renewed until ' .
+                ->with('success', 'Borrowing renewed until '.
                     $borrow->due_date->format('M j, Y'));
 
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->with('error', 'Renewal failed: ' . $e->getMessage());
+                ->with('error', 'Renewal failed: '.$e->getMessage());
         }
     }
 
@@ -141,7 +139,7 @@ class BorrowController extends Controller
             $borrow = $this->borrowingService->returnBook($dto);
 
             $message = $borrow->late_fee > 0
-                ? 'Book returned with late fee: $' . number_format($borrow->late_fee, 2)
+                ? 'Book returned with late fee: $'.number_format($borrow->late_fee, 2)
                 : 'Book returned successfully';
 
             return redirect()
@@ -151,13 +149,14 @@ class BorrowController extends Controller
         } catch (\Exception $e) {
             return redirect()
                 ->back()
-                ->with('error', 'Return failed: ' . $e->getMessage());
+                ->with('error', 'Return failed: '.$e->getMessage());
         }
     }
 
     public function destroy(int $id): RedirectResponse
     {
         $this->borrowingService->deleteBorrow($id);
+
         return redirect()
             ->route('borrows.index')
             ->with('success', 'Borrowing cancelled successfully');

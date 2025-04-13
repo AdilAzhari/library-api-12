@@ -25,11 +25,9 @@ use Inertia\Inertia;
 class BookController extends Controller
 {
     public function __construct(
-        protected BookService       $bookService,
+        protected BookService $bookService,
         protected CoverImageService $coverService
-    )
-    {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -49,7 +47,7 @@ class BookController extends Controller
                 ->selectRaw('count(*) as count')
                 ->groupBy('status')
                 ->get()
-                ->map(fn($item) => ['value' => $item->status, 'count' => $item->count]);
+                ->map(fn ($item) => ['value' => $item->status, 'count' => $item->count]);
 
             return Inertia::render('Books/Index', [
                 'books' => $books->withQueryString()->all(),
@@ -60,14 +58,15 @@ class BookController extends Controller
                     'last_page' => $books->lastPage(),
                     'per_page' => $books->perPage(),
                     'total' => $books->total(),
-                    'links' => $books->linkCollection()->toArray()
+                    'links' => $books->linkCollection()->toArray(),
                 ],
                 'facets' => [
-                    ['field' => 'status', 'values' => $statusFacets]
+                    ['field' => 'status', 'values' => $statusFacets],
                 ],
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to fetch books: ' . $e->getMessage());
+            Log::error('Failed to fetch books: '.$e->getMessage());
+
             return back()->with('error', 'Failed to fetch books. Please try again.');
         }
     }
@@ -97,12 +96,14 @@ class BookController extends Controller
 
             $book = $this->bookService->createBook($bookDTO);
 
-            Log::info('New book created: ' . $book->id);
+            Log::info('New book created: '.$book->id);
+
             return redirect()->route('books.index')
                 ->with('success', 'Book created successfully.');
 
         } catch (Exception $e) {
-            Log::error('Failed to create book: ' . $e->getMessage());
+            Log::error('Failed to create book: '.$e->getMessage());
+
             return back()
                 ->withInput()
                 ->with('error', 'Failed to create book. Please try again.');
@@ -115,6 +116,7 @@ class BookController extends Controller
             $book->load(['reviews', 'currentBorrow', 'currentReservation', 'genre', 'reviews.user']);
             $book->setAppends(['is_available']);
             $recommendedBooks = $this->bookService->getRecommendedBooks($book);
+
             return Inertia::render('Books/Show', [
                 'book' => $book,
                 'recommendedBooks' => $recommendedBooks,
@@ -122,11 +124,12 @@ class BookController extends Controller
                 'isBorrowed' => $book->currentBorrow?->user_id === auth()->id(),
                 'flashMessage' => [
                     'success' => session('success'),
-                    'error' => session('error')
-                ]
+                    'error' => session('error'),
+                ],
             ]);
         } catch (Exception $e) {
-            Log::error('Failed to fetch book details: ' . $e->getMessage());
+            Log::error('Failed to fetch book details: '.$e->getMessage());
+
             return back()->with('error', 'Failed to fetch book details. Please try again.');
         }
     }
@@ -136,7 +139,7 @@ class BookController extends Controller
         return Inertia::render('Books/Edit', [
             'book' => $book,
             'genres' => Genre::all(),
-            'currentCover' => $book->cover_image ? Storage::url($book->cover_image) : null
+            'currentCover' => $book->cover_image ? Storage::url($book->cover_image) : null,
         ]);
     }
 
@@ -164,7 +167,8 @@ class BookController extends Controller
                 ->with('success', 'Book updated successfully.');
 
         } catch (Exception $e) {
-            Log::error('Failed to update book: ' . $e->getMessage());
+            Log::error('Failed to update book: '.$e->getMessage());
+
             return back()
                 ->withInput()
                 ->with('error', 'Failed to update book. Please try again.');
@@ -184,7 +188,8 @@ class BookController extends Controller
 
             return redirect()->back()->with('success', 'Book reserved successfully.');
         } catch (Exception $e) {
-            Log::error('Failed to reserve book: ' . $e->getMessage());
+            Log::error('Failed to reserve book: '.$e->getMessage());
+
             return back()->with('error', $e->getMessage());
         }
     }
@@ -192,7 +197,6 @@ class BookController extends Controller
     /**
      * Handle borrowing a book
      *
-     * @param Book $book
      * @return RedirectResponse
      */
     public function borrow(Book $book)
@@ -214,11 +218,11 @@ class BookController extends Controller
                 ));
 
         } catch (Exception $e) {
-            Log::error('Book borrowing failed - Book ID: ' . $book->id . ' - ' . $e->getMessage());
+            Log::error('Book borrowing failed - Book ID: '.$book->id.' - '.$e->getMessage());
 
             return redirect()
                 ->back()
-                ->with('error', 'Borrowing failed: ' . $e->getMessage());
+                ->with('error', 'Borrowing failed: '.$e->getMessage());
         }
     }
 
@@ -244,7 +248,8 @@ class BookController extends Controller
 
             return redirect()->back()->with('success', 'Review submitted successfully.');
         } catch (Exception $e) {
-            Log::error('Failed to submit review: ' . $e->getMessage());
+            Log::error('Failed to submit review: '.$e->getMessage());
+
             return back()->with('error', 'Failed to submit review. Please try again.');
         }
     }

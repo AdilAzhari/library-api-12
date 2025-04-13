@@ -8,7 +8,6 @@ use App\Http\Requests\StoreReviewRequest;
 use App\Services\ReviewService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,9 +15,7 @@ use Inertia\ResponseFactory;
 
 class ReviewController extends Controller
 {
-    public function __construct(protected ReviewService $reviewService)
-    {
-    }
+    public function __construct(protected ReviewService $reviewService) {}
 
     /**
      * Show the review book form.
@@ -46,7 +43,8 @@ class ReviewController extends Controller
                 ->back()
                 ->with('success', 'Review submitted successfully.');
         } catch (Exception $e) {
-            Log::error('Error submitting review: ' . $e->getMessage());
+            Log::error('Error submitting review: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('error', $e->getMessage()); // Return the actual error message
@@ -60,11 +58,13 @@ class ReviewController extends Controller
     {
         try {
             $this->reviewService->deleteReview($reviewId);
+
             return redirect()
                 ->route('review.index')
                 ->with('success', 'Review deleted successfully.');
         } catch (Exception $e) {
-            Log::error('Error deleting review: ' . $e->getMessage());
+            Log::error('Error deleting review: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('error', 'An error occurred while deleting the review.');

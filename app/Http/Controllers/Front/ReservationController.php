@@ -46,7 +46,8 @@ class ReservationController extends Controller
                 'sortOrder' => $sortOrder,
             ]);
         } catch (Exception $e) {
-            Log::error('Error listing reservations: ' . $e->getMessage());
+            Log::error('Error listing reservations: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('error', 'Failed to load reservations. Please try again.');
@@ -68,10 +69,11 @@ class ReservationController extends Controller
 
             return redirect()
                 ->route('reservations.index')
-                ->with('success', 'Book reserved successfully. Expires on ' .
+                ->with('success', 'Book reserved successfully. Expires on '.
                     $reservation->expires_at->format('M j, Y'));
         } catch (Exception $e) {
-            Log::error('Error creating reservation: ' . $e->getMessage());
+            Log::error('Error creating reservation: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('error', $e->getMessage());
@@ -90,7 +92,8 @@ class ReservationController extends Controller
                 ->route('reservations.index')
                 ->with('success', 'Reservation cancelled successfully.');
         } catch (Exception $e) {
-            Log::error('Error cancelling reservation: ' . $e->getMessage());
+            Log::error('Error cancelling reservation: '.$e->getMessage());
+
             return redirect()
                 ->back()
                 ->with('error', $e->getMessage());
