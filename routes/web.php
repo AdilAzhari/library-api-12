@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\BookController;
 use App\Http\Controllers\Front\BorrowController;
 use App\Http\Controllers\Front\ReservationController;
 use App\Http\Controllers\Front\ReviewController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -111,5 +111,5 @@ Route::middleware(['throttle:60,1', 'auth'])->group(function () {
             Route::post('/{borrow}/return', 'return')->name('borrows.return');
         });
 });
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
 require __DIR__.'/Admin.php';
