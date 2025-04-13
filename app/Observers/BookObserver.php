@@ -23,7 +23,7 @@ class BookObserver
         $book->status = $book->status ?? BookStatus::STATUS_AVAILABLE->value;
 
         // Ensure new books can't be created as borrowed without a borrow record
-        if ($book->status === BookStatus::STATUS_BORROWED->value && !$book->borrowings()->exists()) {
+        if ($book->status === BookStatus::STATUS_BORROWED->value && ! $book->borrowings()->exists()) {
             $book->status = BookStatus::STATUS_AVAILABLE->value;
         }
     }
@@ -35,7 +35,6 @@ class BookObserver
     {
         BookUpdated::dispatch($book);
     }
-
 
     /**
      * Handle the Book "force deleted" event.

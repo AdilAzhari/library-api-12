@@ -13,7 +13,7 @@ class Reservation extends Model
     protected $fillable = [
         'book_id', 'user_id', 'reserved_at',
         'expires_at', 'fulfilled_by_borrow_id', 'canceled_at',
-        'fulfilled_at'
+        'fulfilled_at',
     ];
 
     protected $casts = [
@@ -39,12 +39,12 @@ class Reservation extends Model
 
     public function fulfill(Borrow $borrowing): bool
     {
-        if (!$this->isActive()) {
+        if (! $this->isActive()) {
             return false;
         }
 
         return $this->update([
-            'fulfilled_by_borrow_id' => $borrowing->id
+            'fulfilled_by_borrow_id' => $borrowing->id,
         ]);
     }
 
@@ -85,12 +85,12 @@ class Reservation extends Model
     public function isExpired(): bool
     {
         return $this->expires_at <= now()
-            && !$this->isFulfilled()
+            && ! $this->isFulfilled()
             && $this->expires_at->isPast()
-            && !$this->isCanceled();
+            && ! $this->isCanceled();
     }
 
-    public function scopeActiveForUser($query, int $userId, int $bookId = null)
+    public function scopeActiveForUser($query, int $userId, ?int $bookId = null)
     {
         $query = $query->where('user_id', $userId)
             ->where('expires_at', '>', now())
@@ -109,10 +109,10 @@ class Reservation extends Model
         $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->where(function ($query) use ($search) {
                 $query->whereHas('book', function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%');
+                    $query->where('title', 'like', '%'.$search.'%');
                 })
                     ->orWhereHas('user', function ($query) use ($search) {
-                        $query->where('name', 'like', '%' . $search . '%');
+                        $query->where('name', 'like', '%'.$search.'%');
                     });
             });
         })

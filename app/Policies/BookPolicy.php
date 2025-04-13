@@ -7,7 +7,6 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BookPolicy
 {
-
     use HandlesAuthorization;
 
     public function viewAny(User $user): bool

@@ -12,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -35,12 +35,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
     protected $appends = ['is_admin'];
 
     public function getIsAdminAttribute(): bool
     {
         return $this->role === 'Admin';
     }
+
     public function ScopeIsAdmin(): bool
     {
         return $this->role === 'Admin';

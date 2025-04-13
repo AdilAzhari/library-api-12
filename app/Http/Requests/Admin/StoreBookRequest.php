@@ -22,11 +22,11 @@ class StoreBookRequest extends \App\Http\Requests\StoreBookRequest
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'publication_year' => 'required|digits:4|integer|min:1900|max:' . now()->format('Y'),
+            'publication_year' => 'required|digits:4|integer|min:1900|max:'.now()->format('Y'),
             'genre_id' => 'required|integer|exists:genres,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'ISBN' => 'nullable|string|max:17|unique:books,ISBN',
-            'status' => 'sometimes|in:available,borrowed,reserved'
+            'status' => 'sometimes|in:available,borrowed,reserved',
         ];
     }
 
@@ -48,7 +48,7 @@ class StoreBookRequest extends \App\Http\Requests\StoreBookRequest
             'cover_image.max' => 'The cover image may not be larger than 2MB.',
             'ISBN.max' => 'The ISBN may not be longer than 17 characters.',
             'ISBN.unique' => 'This ISBN already exists in our system.',
-            'status.in' => 'The selected status is invalid.'
+            'status.in' => 'The selected status is invalid.',
         ];
     }
 

@@ -11,6 +11,7 @@ class Genre extends Model
 {
     /** @use HasFactory<GenreFactory> */
     use HasFactory;
+
     protected $fillable = [
         'name',
         'slug',

@@ -12,8 +12,11 @@ abstract class BookStatusState
     public function __construct(protected Book $book) {}
 
     abstract public function reserve(): void;
+
     abstract public function borrow(): void;
+
     abstract public function return(): void;
+
     abstract public function cancelReservation(): void;
 
     protected function transitionTo(BookStatus $status): void

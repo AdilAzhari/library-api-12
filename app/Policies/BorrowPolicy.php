@@ -30,7 +30,7 @@ class BorrowPolicy
         return $borrow->user_id === $user->id
             && $borrow->returned_at === null
             && $borrow->renewal_count < config('library.max_renewals', 2)
-            && !$borrow->isOverdue();
+            && ! $borrow->isOverdue();
     }
 
     public function return(User $user, Borrow $borrow): bool

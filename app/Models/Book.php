@@ -21,21 +21,21 @@ use Laravel\Scout\Searchable;
 #[ObservedBy([BookObserver::class])]
 class Book extends Model
 {
-    use SoftDeletes, HasFactory, Searchable;
+    use HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'title', 'author', 'description', 'publication_year',
-        'genre_id', 'cover_image', 'average_rating', 'ISBN', 'status'
+        'genre_id', 'cover_image', 'average_rating', 'ISBN', 'status',
     ];
 
     protected $attributes = [
-        'status' => BookStatus::STATUS_AVAILABLE->value
+        'status' => BookStatus::STATUS_AVAILABLE->value,
     ];
 
     protected $appends = [
         'is_available',
         'cover_image_url',
-        'has_active_reservation_for_user'
+        'has_active_reservation_for_user',
     ];
 
     protected $casts = [
@@ -87,7 +87,7 @@ class Book extends Model
 
     public function getCoverImageUrlAttribute(): string
     {
-        if ($this->cover_image && Storage::exists('public/' . $this->cover_image)) {
+        if ($this->cover_image && Storage::exists('public/'.$this->cover_image)) {
             return Storage::url($this->cover_image);
         }
 
@@ -96,7 +96,7 @@ class Book extends Model
 
     public function getHasActiveReservationForUserAttribute(): bool
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return false;
         }
 
@@ -131,7 +131,7 @@ class Book extends Model
 
         return $this->status === BookStatus::STATUS_AVAILABLE ||
             ($this->status === BookStatus::STATUS_BORROWED &&
-                !$this->activeReservation) ||
+                ! $this->activeReservation) ||
             ($this->status === BookStatus::STATUS_RESERVED &&
                 optional($this->activeReservation)->isExpired());
     }
@@ -153,7 +153,7 @@ class Book extends Model
     public function toSearchableArray(): array
     {
         return [
-            'id' => (string)$this->id,
+            'id' => (string) $this->id,
             'title' => $this->title,
             'author' => $this->author,
             'description' => $this->description,

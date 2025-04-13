@@ -11,6 +11,7 @@ class Review extends Model
 {
     /** @use HasFactory<ReviewFactory> */
     use HasFactory;
+
     protected $fillable = [
         'book_id',
         'user_id',

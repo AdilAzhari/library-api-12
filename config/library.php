@@ -1,4 +1,5 @@
 <?php
+
 return [
     'reservation' => [
         'expiry_days' => 7, // Default reservation duration

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Console\Commands;
 
 use App\Models\Borrow;
@@ -8,12 +9,13 @@ use Illuminate\Console\Command;
 class CheckOverdueBooks extends Command
 {
     protected $signature = 'books:check-overdue';
+
     protected $description = 'Check for overdue books and send notifications';
 
     public function handle(): void
     {
         $overdueBorrowings = Borrow::overdue()
-            ->whereDoesntHave('notifications', function($query) {
+            ->whereDoesntHave('notifications', function ($query) {
                 $query->where('type', OverdueBookNotification::class);
             })
             ->with(['user', 'book'])

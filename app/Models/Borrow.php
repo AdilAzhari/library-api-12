@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Laravel\Scout\Searchable;
 
 #[ObservedBy('App\Observers\BorrowObserver')]
 class Borrow extends Model
@@ -41,7 +40,7 @@ class Borrow extends Model
 
     public function isOverdue(): bool
     {
-        return !$this->returned_at && $this->due_date->isPast();
+        return ! $this->returned_at && $this->due_date->isPast();
     }
 
     public function renew(int $days = 14): bool
@@ -52,7 +51,7 @@ class Borrow extends Model
 
         $this->update([
             'due_date' => $this->due_date->addDays($days),
-            'renewal_count' => $this->renewal_count + 1
+            'renewal_count' => $this->renewal_count + 1,
         ]);
 
         return true;

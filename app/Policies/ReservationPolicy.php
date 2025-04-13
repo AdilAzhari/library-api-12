@@ -24,6 +24,6 @@ class ReservationPolicy
     {
         return $user->id === $reservation->user_id
             && $reservation->expires_at > now()
-            && !$reservation->isFulfilled();
+            && ! $reservation->isFulfilled();
     }
 }
