@@ -1,6 +1,7 @@
 <?php
 
 namespace App\DTO;
+
 class ReturnBookDTO
 {
     public function __construct(

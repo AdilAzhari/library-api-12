@@ -2,27 +2,25 @@
 
 namespace App\DTO;
 
-use Illuminate\Http\UploadedFile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 readonly class BookCreateDTO
 {
     public function __construct(
-        public string        $title,
-        public string        $author,
-        public int           $publication_year,
-        public ?string       $description = null,
-        public int           $genre_id,
+        public string $title,
+        public string $author,
+        public int $publication_year,
+        public ?string $description,
+        public int $genre_id,
         public ?UploadedFile $cover_image = null,
-        public ?string       $ISBN = null,
-        public ?string       $cover_image_path = null,
-        public float         $average_rating = 0,
-        public string        $status = 'available',
-    )
-    {
-    }
+        public ?string $ISBN = null,
+        public ?string $cover_image_path = null,
+        public float $average_rating = 0,
+        public string $status = 'available',
+    ) {}
 
     public static function fromRequest(Request $request): self
     {
@@ -43,7 +41,7 @@ readonly class BookCreateDTO
         return Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
-            'publication_year' => 'required|digits:4|integer|min:1900|max:' . date('Y'),
+            'publication_year' => 'required|digits:4|integer|min:1900|max:'.date('Y'),
             'description' => 'nullable|string',
             'genre_id' => 'required|integer|exists:genres,id',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -65,13 +63,13 @@ readonly class BookCreateDTO
             'cover_image.max' => 'The cover image may not be larger than 2MB.',
             'ISBN.max' => 'The ISBN may not be longer than 17 characters.',
             'ISBN.unique' => 'This ISBN already exists in our system.',
-            'status.in' => 'The selected status is invalid.'
+            'status.in' => 'The selected status is invalid.',
         ])->validate();
     }
 
     public function generateUniqueIdentifier(): string
     {
-        return Str::slug($this->title . '-' . $this->author . '-' . $this->publication_year);
+        return Str::slug($this->title.'-'.$this->author.'-'.$this->publication_year);
     }
 
     public function sanitize(): self
@@ -95,15 +93,15 @@ readonly class BookCreateDTO
 
     public function getCoverImagePath(?string $basePath = null): ?string
     {
-        if (!$this->hasCoverImage()) {
+        if (! $this->hasCoverImage()) {
             return null;
         }
 
-        $filename = $this->generateUniqueIdentifier() . '.' .
+        $filename = $this->generateUniqueIdentifier().'.'.
             $this->cover_image->getClientOriginalExtension();
 
         return $basePath
-            ? rtrim($basePath, '/') . '/' . $filename
+            ? rtrim($basePath, '/').'/'.$filename
             : $filename;
     }
 

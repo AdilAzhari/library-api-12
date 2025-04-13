@@ -9,17 +9,15 @@ use Illuminate\Support\Str;
 readonly class BookUpdateDTO
 {
     public function __construct(
-        public string        $title,
-        public string        $author,
-        public int           $publication_year,
-        public ?string       $description = null,
-        public int           $genre_id,
+        public string $title,
+        public string $author,
+        public int $publication_year,
+        public ?string $description,
+        public int $genre_id,
         public ?UploadedFile $cover_image = null,
-        public ?string       $isbn = null,
-        public string        $status = 'available',
-    )
-    {
-    }
+        public ?string $isbn = null,
+        public string $status = 'available',
+    ) {}
 
     public static function fromRequest(Request $request): self
     {
@@ -83,20 +81,20 @@ readonly class BookUpdateDTO
 
     public function generateUniqueIdentifier(): string
     {
-        return Str::slug($this->title . '-' . $this->author . '-' . $this->publication_year);
+        return Str::slug($this->title.'-'.$this->author.'-'.$this->publication_year);
     }
 
     public function getCoverImagePath(?string $basePath = null): ?string
     {
-        if (!$this->hasCoverImage()) {
+        if (! $this->hasCoverImage()) {
             return null;
         }
 
-        $filename = $this->generateUniqueIdentifier() . '.' .
+        $filename = $this->generateUniqueIdentifier().'.'.
             $this->cover_image->getClientOriginalExtension();
 
         return $basePath
-            ? rtrim($basePath, '/') . '/' . $filename
+            ? rtrim($basePath, '/').'/'.$filename
             : $filename;
     }
 }
