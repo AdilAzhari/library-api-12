@@ -17,9 +17,7 @@ class BookUpdated extends \Spatie\EventSourcing\StoredEvents\ShouldBeStored impl
     /**
      * Create a new event instance.
      */
-    public function __construct(public Book $book)
-    {
-    }
+    public function __construct(public Book $book) {}
 
     /**
      * Get the channels the event should broadcast on.

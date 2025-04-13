@@ -17,9 +17,7 @@ class BookDeletedPermanently extends \Spatie\EventSourcing\StoredEvents\ShouldBe
     /**
      * Create a new event instance.
      */
-    public function __construct(public Book $book)
-    {
-    }
+    public function __construct(public Book $book) {}
 
     /**
      * Get the channels the event should broadcast on.

@@ -18,9 +18,7 @@ class BookCreated extends ShouldBeStored implements ShouldBroadcast
     /**
      * Create a new event instance.
      */
-    public function __construct(public book $book)
-    {
-    }
+    public function __construct(public book $book) {}
 
     /**
      * Get the channels the event should broadcast on.

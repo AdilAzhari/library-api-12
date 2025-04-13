@@ -15,17 +15,21 @@ class BookAggregate extends AggregateRoot
     public function createBook(book $data): static
     {
         $this->recordThat(new BookCreated($data));
+
         return $this;
     }
+
     public function updateBook(book $data): static
     {
         $this->recordThat(new BookUpdated($data));
+
         return $this;
     }
 
     public function deleteBook(book $book): static
     {
         $this->recordThat(new BookDeletedPermanently($book));
+
         return $this;
     }
 }
