@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Requests\BookStoreRequest;
 
-it('validates book store request', function () {
+it('validates book store request', function (): void {
     $request = new BookStoreRequest([
         'title' => 'Test Book',
         'author' => 'Test Author',
@@ -15,7 +17,7 @@ it('validates book store request', function () {
         ->toMatchArray([
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
-            'publication_year' => 'required|digits:4|integer|min:1900|max:' . now()->format('Y'),
+            'publication_year' => 'required|digits:4|integer|min:1900|max:'.now()->format('Y'),
             'genre_id' => 'required|integer|exists:genres,id',
         ]);
 });

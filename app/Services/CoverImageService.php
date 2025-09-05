@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class CoverImageService
+final class CoverImageService
 {
     public function store(UploadedFile $file, string $title, string $author, int $year): string
     {
@@ -37,7 +39,7 @@ class CoverImageService
         }
     }
 
-    protected function generateFilename(UploadedFile $file, string $title, string $author, int $year): string
+    private function generateFilename(UploadedFile $file, string $title, string $author, int $year): string
     {
         return Str::slug("$title-$author-$year").'.'.$file->getClientOriginalExtension();
     }

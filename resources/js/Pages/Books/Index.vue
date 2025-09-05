@@ -8,19 +8,66 @@
                 <div class="md:w-1/2 mb-6 md:mb-0">
                     <h2 class="text-3xl font-serif font-bold text-[#2c3e50] mb-3">Discover Your Next Read</h2>
                     <p class="text-lg text-gray-700 mb-6">Browse our collection of carefully curated books</p>
+                    
+                    <!-- Enhanced Search Box -->
                     <div class="relative w-full max-w-md">
-                        <input
-                            type="text"
-                            placeholder="Search by title, author or genre..."
-                            class="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
-                            v-model="filters.search"
-                            @input="handleSearchInput"
-                        />
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 absolute left-3 top-3.5"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                placeholder="Search by title, author, ISBN or genre..."
+                                class="w-full pl-12 pr-24 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 transition-all duration-200"
+                                v-model="filters.search"
+                                @input="handleSearchInput"
+                                @focus="showSearchSuggestions = true"
+                                @blur="hideSearchSuggestions"
+                                @keydown.escape="showSearchSuggestions = false"
+                                @keydown.enter="handleSearchSubmit"
+                            />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500 absolute left-3 top-3.5"
+                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            
+                            <!-- Clear search button -->
+                            <button
+                                v-if="filters.search"
+                                @click="clearSearch"
+                                class="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Search Results Summary -->
+                        <div v-if="filters.search && !isLoading" class="mt-2 text-sm text-gray-600">
+                            Found {{ props.pagination?.total || 0 }} books matching "{{ filters.search }}"
+                        </div>
+                        
+                        <!-- Search Loading Indicator -->
+                        <div v-if="isSearching" class="absolute right-12 top-3.5">
+                            <div class="animate-spin h-5 w-5 border-2 border-amber-500 border-t-transparent rounded-full"></div>
+                        </div>
+                        
+                        <!-- Quick Search Suggestions (appears when focused and no search term) -->
+                        <div
+                            v-if="showSearchSuggestions && !filters.search"
+                            class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 p-3"
+                        >
+                            <div class="text-sm text-gray-700 mb-2 font-medium">Popular searches:</div>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    v-for="suggestion in popularSearches"
+                                    :key="suggestion"
+                                    @mousedown.prevent="searchForSuggestion(suggestion)"
+                                    class="px-3 py-1 text-sm bg-gray-100 hover:bg-amber-100 rounded-full transition-colors"
+                                >
+                                    {{ suggestion }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="md:w-1/2 flex justify-center">
@@ -28,65 +75,178 @@
                 </div>
             </div>
 
-            <!-- Filter Bar -->
-            <div
-                class="mb-10 bg-white rounded-xl shadow-sm p-4 flex flex-col md:flex-row gap-4 items-center border border-[#e8e3d5]">
-                <div class="flex flex-col md:flex-row w-full gap-4">
-                    <!-- Genre Filter -->
-                    <div class="relative flex-grow">
-                        <select
-                            v-model="filters.genre"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 appearance-none bg-white"
-                            @change="applyFilters"
-                        >
-                            <option value="">All Genres</option>
-                            <option v-for="genre in genres" :key="genre.id" :value="genre.id">{{ genre.name }}</option>
-                        </select>
-                    </div>
+            <!-- Enhanced Filter Bar -->
+            <div class="mb-10 bg-white rounded-xl shadow-sm p-6 border border-[#e8e3d5]">
+                <!-- Basic Filters Row -->
+                <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center mb-4">
+                    <div class="flex flex-col sm:flex-row w-full gap-4">
+                        <!-- Genre Filter -->
+                        <div class="relative flex-grow">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Genre</label>
+                            <select
+                                v-model="filters.genre"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 appearance-none bg-white"
+                                @change="applyFilters"
+                            >
+                                <option value="">All Genres</option>
+                                <option v-for="genre in genres" :key="genre.id" :value="genre.id">{{ genre.name }}</option>
+                            </select>
+                        </div>
 
-                    <!-- Status Filter -->
-                    <div class="relative flex-grow">
-                        <select
-                            v-model="filters.status"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 appearance-none bg-white"
-                            @change="applyFilters"
-                        >
-                            <option value="">All Statuses</option>
-                            <option v-for="status in statusFacets" :key="status.value" :value="status.value">
-                                {{ status.value }} ({{ status.count }})
-                            </option>
-                        </select>
-                    </div>
+                        <!-- Status Filter -->
+                        <div class="relative flex-grow">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Availability</label>
+                            <select
+                                v-model="filters.status"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 appearance-none bg-white"
+                                @change="applyFilters"
+                            >
+                                <option value="">All Statuses</option>
+                                <option v-for="status in statusFacets" :key="status.value" :value="status.value">
+                                    {{ formatStatusLabel(status.value) }} ({{ status.count }})
+                                </option>
+                            </select>
+                        </div>
 
-                    <!-- Sort Options -->
-                    <div class="relative flex-grow">
-                        <select
-                            v-model="filters.sort"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 appearance-none bg-white"
-                            @change="applyFilters"
-                        >
-                            <option value="">Sort By</option>
-                            <option value="title_asc">Title (A-Z)</option>
-                            <option value="title_desc">Title (Z-A)</option>
-                            <option value="author_asc">Author (A-Z)</option>
-                            <option value="author_desc">Author (Z-A)</option>
-                            <option value="year_desc">Newest First</option>
-                            <option value="year_asc">Oldest First</option>
-                        </select>
+                        <!-- Sort Options -->
+                        <div class="relative flex-grow">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Sort by</label>
+                            <select
+                                v-model="filters.sort"
+                                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300 appearance-none bg-white"
+                                @change="applyFilters"
+                            >
+                                <option value="">Default</option>
+                                <option value="title_asc">Title (A-Z)</option>
+                                <option value="title_desc">Title (Z-A)</option>
+                                <option value="author_asc">Author (A-Z)</option>
+                                <option value="author_desc">Author (Z-A)</option>
+                                <option value="year_desc">Publication Year (Newest)</option>
+                                <option value="year_asc">Publication Year (Oldest)</option>
+                                <option value="rating_desc">Rating (Highest)</option>
+                                <option value="rating_asc">Rating (Lowest)</option>
+                            </select>
+                        </div>
                     </div>
+                </div>
 
+                <!-- Advanced Filters Toggle -->
+                <div class="border-t pt-4">
                     <button
-                        v-if="hasFilters"
-                        class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition flex items-center justify-center"
-                        @click="resetFilters"
+                        @click="showAdvancedFilters = !showAdvancedFilters"
+                        class="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors mb-4"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                             stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="{ 'rotate-180': showAdvancedFilters }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                        Reset
+                        Advanced Filters
                     </button>
+
+                    <!-- Advanced Filters Section -->
+                    <div v-if="showAdvancedFilters" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Publication Year Range -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Publication Year</label>
+                                <div class="flex gap-2">
+                                    <input
+                                        type="number"
+                                        placeholder="From"
+                                        v-model="filters.year_from"
+                                        @input="handleAdvancedFilterChange"
+                                        class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                                        min="1800"
+                                        max="2024"
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="To"
+                                        v-model="filters.year_to"
+                                        @input="handleAdvancedFilterChange"
+                                        class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                                        min="1800"
+                                        max="2024"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Rating Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Rating</label>
+                                <select
+                                    v-model="filters.min_rating"
+                                    @change="handleAdvancedFilterChange"
+                                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                                >
+                                    <option value="">Any Rating</option>
+                                    <option value="1">1+ Stars</option>
+                                    <option value="2">2+ Stars</option>
+                                    <option value="3">3+ Stars</option>
+                                    <option value="4">4+ Stars</option>
+                                    <option value="5">5 Stars</option>
+                                </select>
+                            </div>
+
+                            <!-- Author Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Author</label>
+                                <input
+                                    type="text"
+                                    placeholder="Search by author..."
+                                    v-model="filters.author"
+                                    @input="handleAdvancedFilterChange"
+                                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                                />
+                            </div>
+
+                            <!-- ISBN Filter -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">ISBN</label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter ISBN..."
+                                    v-model="filters.isbn"
+                                    @input="handleAdvancedFilterChange"
+                                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:ring-2 focus:ring-amber-300 focus:border-amber-300"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons and Results Summary -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-4 border-t">
+                    <div class="text-sm text-gray-600">
+                        <span v-if="!isLoading">
+                            Showing {{ props.pagination?.from || 0 }}-{{ props.pagination?.to || 0 }} of {{ props.pagination?.total || 0 }} books
+                            <span v-if="hasActiveFilters" class="text-amber-600 font-medium ml-1">(filtered)</span>
+                        </span>
+                        <span v-else>Searching...</span>
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <button
+                            v-if="hasActiveFilters"
+                            @click="resetFilters"
+                            class="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            Clear Filters
+                        </button>
+                        
+                        <button
+                            @click="saveSearchPreferences"
+                            v-if="hasActiveFilters"
+                            class="flex items-center gap-2 px-4 py-2 text-sm bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                            Save Search
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -197,8 +357,32 @@
                             </Link>
 
                             <div class="flex space-x-2">
+                                <!-- Add to Reading List Button -->
                                 <button
-                                    v-if="book.status === 'available' && !book.isBorrowed"
+                                    @click="showAddToListModal(book)"
+                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-sm font-medium transition flex items-center"
+                                    title="Add to Reading List"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
+                                    </svg>
+                                </button>
+                                
+                                <!-- Primary Actions -->
+                                <button
+                                    v-if="book.status === 'available' && book.has_active_reservation_for_user"
+                                    @click="borrowBook(book.id)"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium transition flex items-center"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                         viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                    </svg>
+                                    Borrow
+                                </button>
+                                <button
+                                    v-else-if="book.status === 'available' && !book.isBorrowed"
                                     @click="reserveBook(book.id)"
                                     class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded text-sm font-medium transition flex items-center"
                                 >
@@ -208,18 +392,6 @@
                                               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
                                     Reserve
-                                </button>
-                                <button
-                                    v-if="book.has_active_reservation_for_user && !book.isBorrowed"
-                                    @click="borrowBook(book.id)"
-                                    class="bg-[#2c3e50] hover:bg-[#34495e] text-white px-3 py-1 rounded text-sm font-medium transition flex items-center"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                         viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                                    </svg>
-                                    Borrow
                                 </button>
                                 <button
                                     v-else-if="book.status === 'borrowed' && !book.isBorrowed"
@@ -234,19 +406,19 @@
                                     Reserve
                                 </button>
                                 <span v-else-if="book.status === 'reserved' && !book.has_active_reservation_for_user"
-                                      class="text-xs text-gray-500 flex items-center">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    Reserved
-</span>
-                                <span v-if="book.isBorrowed" class="text-xs text-gray-500 flex items-center">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-    </svg>
-    You have this book
-</span>
+                                      class="text-xs text-gray-500 flex items-center px-2 py-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Reserved
+                                </span>
+                                <span v-if="book.isBorrowed" class="text-xs text-green-600 flex items-center px-2 py-1 bg-green-50 rounded">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Borrowed
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -311,7 +483,58 @@
         </main>
 
         <!-- Footer -->
-        <Footer/>
+        <Footer :year="new Date().getFullYear()" />
+        
+        <!-- Add to Reading List Modal -->
+        <div v-if="showListModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+                        <svg class="h-6 w-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 text-center mt-4">Add to Reading List</h3>
+                    <p class="text-sm text-gray-500 text-center mt-2">
+                        Add "{{ selectedBook?.title }}" to one of your reading lists
+                    </p>
+                    
+                    <div class="mt-6">
+                        <div v-if="userReadingLists.length > 0" class="space-y-2 max-h-48 overflow-y-auto">
+                            <button v-for="list in userReadingLists" :key="list.id" 
+                                    @click="addBookToList(selectedBook.id, list.id)"
+                                    class="w-full text-left px-3 py-2 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" 
+                                         :class="`bg-${list.color_theme || 'blue'}-100`">
+                                        <svg class="w-4 h-4" :class="`text-${list.color_theme || 'blue'}-600`" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">{{ list.name }}</p>
+                                        <p class="text-sm text-gray-500">{{ list.books_count || 0 }} books</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+                        <div v-else class="text-center py-6 text-gray-500">
+                            <p class="text-sm">You don't have any reading lists yet.</p>
+                            <Link href="/reading-lists/create" class="text-blue-600 hover:text-blue-800 text-sm font-medium mt-2 inline-block">
+                                Create your first reading list
+                            </Link>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mt-6">
+                        <button @click="showListModal = false"
+                                class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -359,17 +582,44 @@ const isLoading = ref(false);
 const currentPage = ref(props.pagination.current_page);
 const totalPages = computed(() => props.pagination.last_page);
 const searchTimeout = ref(null);
+const showListModal = ref(false);
+const selectedBook = ref(null);
+const userReadingLists = ref([]);
 
+// Enhanced filter state
 const filters = reactive({
     search: props.filters.search || '',
     genre: props.filters.genre || '',
     status: props.filters.status || '',
-    sort: props.filters.sort || ''
+    sort: props.filters.sort || '',
+    year_from: props.filters.year_from || '',
+    year_to: props.filters.year_to || '',
+    min_rating: props.filters.min_rating || '',
+    author: props.filters.author || '',
+    isbn: props.filters.isbn || ''
 });
+
+// Enhanced UI state
+const showAdvancedFilters = ref(false);
+const showSearchSuggestions = ref(false);
+const isSearching = ref(false);
+const advancedFilterTimeout = ref(null);
+
+// Popular search terms (could be fetched from backend)
+const popularSearches = ref([
+    'fiction', 'mystery', 'romance', 'science fiction', 
+    'biography', 'history', 'philosophy', 'programming'
+]);
 
 // Computed properties
 const hasFilters = computed(() => {
     return filters.search || filters.genre || filters.status || filters.sort;
+});
+
+const hasActiveFilters = computed(() => {
+    return filters.search || filters.genre || filters.status || filters.sort ||
+           filters.year_from || filters.year_to || filters.min_rating ||
+           filters.author || filters.isbn;
 });
 
 const statusFacets = computed(() => {
@@ -410,7 +660,7 @@ const borrowBook = (bookId) => {
 };
 
 const reserveBook = (bookId) => {
-    router.post(`/books/${bookId}/reserve`, {}, {
+    router.post(`/reservations/books/${bookId}/reserve`, {}, {
         onSuccess: () => {
             router.reload({only: ['books']});
         },
@@ -421,41 +671,175 @@ const reserveBook = (bookId) => {
     });
 };
 
-const applyFilters = () => {
-    isLoading.value = true;
-    router.get(route('books.index'), {
-        ...filters,
-        page: 1 // Reset to first page when applying new filters
-    }, {
-        preserveState: true,
-        replace: true,
-        onFinish: () => {
-            isLoading.value = false;
+const showAddToListModal = async (book) => {
+    selectedBook.value = book;
+    showListModal.value = true;
+    
+    // Fetch user's reading lists
+    try {
+        const response = await fetch('/api/reading-lists/user');
+        const data = await response.json();
+        userReadingLists.value = data.reading_lists || [];
+    } catch (error) {
+        console.error('Failed to fetch reading lists:', error);
+        userReadingLists.value = [];
+    }
+};
+
+const addBookToList = (bookId, listId) => {
+    router.post(`/reading-lists/${listId}/books/${bookId}`, {}, {
+        onSuccess: () => {
+            showListModal.value = false;
+            selectedBook.value = null;
+            alert('Book added to reading list successfully!');
+        },
+        onError: (errors) => {
+            const errorMsg = errors.message || 'Failed to add book to reading list.';
+            alert(errorMsg);
         }
     });
 };
+
 
 const resetFilters = () => {
     filters.search = '';
     filters.genre = '';
     filters.status = '';
     filters.sort = '';
+    filters.year_from = '';
+    filters.year_to = '';
+    filters.min_rating = '';
+    filters.author = '';
+    filters.isbn = '';
+    showAdvancedFilters.value = false;
     applyFilters();
 };
 
 const handleSearchInput = () => {
+    isSearching.value = true;
     clearTimeout(searchTimeout.value);
     searchTimeout.value = setTimeout(() => {
-        applyFilters();
+        const result = applyFilters();
+        if (result && typeof result.finally === 'function') {
+            result.finally(() => {
+                isSearching.value = false;
+            });
+        } else {
+            isSearching.value = false;
+        }
     }, 500);
+};
+
+const handleAdvancedFilterChange = () => {
+    clearTimeout(advancedFilterTimeout.value);
+    advancedFilterTimeout.value = setTimeout(() => {
+        applyFilters();
+    }, 800);
+};
+
+const handleSearchSubmit = () => {
+    clearTimeout(searchTimeout.value);
+    isSearching.value = true;
+    const result = applyFilters();
+    if (result && typeof result.finally === 'function') {
+        result.finally(() => {
+            isSearching.value = false;
+        });
+    } else {
+        isSearching.value = false;
+    }
+};
+
+const clearSearch = () => {
+    filters.search = '';
+    showSearchSuggestions.value = false;
+    applyFilters();
+};
+
+const hideSearchSuggestions = () => {
+    setTimeout(() => {
+        showSearchSuggestions.value = false;
+    }, 150);
+};
+
+const searchForSuggestion = (suggestion) => {
+    filters.search = suggestion;
+    showSearchSuggestions.value = false;
+    handleSearchSubmit();
+};
+
+const formatStatusLabel = (status) => {
+    switch(status) {
+        case 'available':
+            return 'Available';
+        case 'borrowed':
+            return 'Borrowed';
+        case 'reserved':
+            return 'Reserved';
+        default:
+            return status?.charAt(0)?.toUpperCase() + status?.slice(1) || 'Unknown';
+    }
+};
+
+const saveSearchPreferences = () => {
+    // Save current search preferences to localStorage
+    const preferences = {
+        genre: filters.genre,
+        sort: filters.sort,
+        year_from: filters.year_from,
+        year_to: filters.year_to,
+        min_rating: filters.min_rating
+    };
+    
+    localStorage.setItem('book_search_preferences', JSON.stringify(preferences));
+    
+    // Show success message (you might want to use a proper notification system)
+    alert('Search preferences saved successfully!');
+};
+
+// Enhanced apply filters method
+const applyFilters = () => {
+    isLoading.value = true;
+    
+    // Build clean filter object
+    const filterParams = {};
+    Object.keys(filters).forEach(key => {
+        if (filters[key]) {
+            filterParams[key] = filters[key];
+        }
+    });
+    
+    return router.get(route('books.index'), {
+        ...filterParams,
+        page: 1 // Reset to first page when applying new filters
+    }, {
+        preserveState: true,
+        replace: true,
+        onFinish: () => {
+            isLoading.value = false;
+        },
+        onError: () => {
+            isLoading.value = false;
+            isSearching.value = false;
+        }
+    });
 };
 
 const goToPage = (page) => {
     if (page < 1 || page > totalPages.value || page === currentPage.value) return;
 
     isLoading.value = true;
+    
+    // Build clean filter object for pagination
+    const filterParams = {};
+    Object.keys(filters).forEach(key => {
+        if (filters[key]) {
+            filterParams[key] = filters[key];
+        }
+    });
+    
     router.get(route('books.index'), {
-        ...filters,
+        ...filterParams,
         page
     }, {
         preserveState: true,

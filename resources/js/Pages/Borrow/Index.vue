@@ -241,7 +241,7 @@
             </div>
         </main>
 
-        <Footer/>
+        <Footer :year="new Date().getFullYear()" />
     </div>
 </template>
 

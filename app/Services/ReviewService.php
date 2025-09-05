@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTO\ReviewBookDTO;
@@ -9,7 +11,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
-class ReviewService
+final class ReviewService
 {
     /**
      * Submit a review for a book.
@@ -38,16 +40,6 @@ class ReviewService
             Log::error('Error submitting review: '.$e->getMessage());
             throw new Exception('Failed to submit review: '.$e->getMessage()); // Include the actual error message
         }
-    }
-
-    /**
-     * Update the average rating of a book.
-     */
-    protected function updateBookRating(int $bookId): void
-    {
-        $book = Book::query()->findOrFail($bookId);
-        $averageRating = Review::query()->where('book_id', $bookId)->avg('rating');
-        $book->update(['average_rating' => $averageRating]);
     }
 
     /**
@@ -97,5 +89,15 @@ class ReviewService
             Log::error('Error deleting review: '.$e->getMessage());
             throw new Exception('Failed to delete review. Please try again.');
         }
+    }
+
+    /**
+     * Update the average rating of a book.
+     */
+    private function updateBookRating(int $bookId): void
+    {
+        $book = Book::query()->findOrFail($bookId);
+        $averageRating = Review::query()->where('book_id', $bookId)->avg('rating');
+        $book->update(['average_rating' => $averageRating]);
     }
 }

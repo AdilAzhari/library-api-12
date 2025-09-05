@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO;
 
-class BorrowBookDTO
+final class BorrowBookDTO
 {
     public function __construct(
         public int $bookId,

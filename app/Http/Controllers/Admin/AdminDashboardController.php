@@ -9,31 +9,56 @@ use App\Models\Book;
 use App\Models\Borrow;
 use App\Models\Reservation;
 use App\Models\User;
+use Exception;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class AdminDashboardController extends Controller
+final class AdminDashboardController extends Controller
 {
     public function index()
     {
-        $stats = [
-            'total_books' => Book::count(),
-            'active_borrowings' => Borrow::active()->count(),
-            'overdue_books' => Borrow::overdue()->count(),
-            'active_reservations' => Reservation::active()->count(),
-        ];
-
-        $charts = [
-            'borrowings' => $this->getBorrowingsChartData(),
-            'genres' => $this->getPopularGenresData(),
-        ];
-
-        $recentActivities = $this->getRecentActivities();
-
-        return Inertia::render('Admin/Dashboard', [
-            'stats' => $stats,
-            'charts' => $charts,
-            'recentActivities' => $recentActivities,
+        Log::info('AdminDashboardController::index - Loading admin dashboard', [
+            'user_id' => Auth::id(),
         ]);
+
+        try {
+            $stats = [
+                'total_books' => Book::count(),
+                'active_borrowings' => Borrow::active()->count(),
+                'overdue_books' => Borrow::overdue()->count(),
+                'active_reservations' => Reservation::active()->count(),
+            ];
+
+            $charts = [
+                'borrowings' => $this->getBorrowingsChartData(),
+                'genres' => $this->getPopularGenresData(),
+            ];
+
+            $recentActivities = $this->getRecentActivities();
+
+            Log::info('AdminDashboardController::index - Dashboard data loaded successfully', [
+                'user_id' => Auth::id(),
+                'stats' => $stats,
+                'recent_activities_count' => count($recentActivities),
+            ]);
+
+            return Inertia::render('Admin/Dashboard', [
+                'stats' => $stats,
+                'charts' => $charts,
+                'recentActivities' => $recentActivities,
+            ]);
+        } catch (Exception $e) {
+            Log::error('AdminDashboardController::index - Error loading dashboard', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect()->back()->with('error', 'An error occurred while loading the dashboard.');
+        }
     }
 
     protected function getBorrowingsChartData()
@@ -88,18 +113,16 @@ class AdminDashboardController extends Controller
 
     protected function getPopularGenresData()
     {
-        return Book::withCount('borrows')
+        return Book::query()->withCount('borrows')
             ->with('genre')
             ->orderBy('borrows_count', 'desc')
             ->limit(5)
             ->get()
             ->groupBy('genre.name')
-            ->map(function ($books, $genre) {
-                return [
-                    'name' => $genre ?: 'Uncategorized',
-                    'count' => $books->sum('borrows_count'),
-                ];
-            })
+            ->map(fn ($books, $genre) => [
+                'name' => $genre ?: 'Uncategorized',
+                'count' => $books->sum('borrows_count'),
+            ])
             ->values()
             ->filter()
             ->toArray();
@@ -107,56 +130,50 @@ class AdminDashboardController extends Controller
 
     protected function getRecentActivities()
     {
-        $borrowings = Borrow::with(['book', 'user'])
+        $borrowings = Borrow::query()->with(['book', 'user'])
             ->latest()
             ->limit(5)
             ->get()
-            ->map(function ($borrowing) {
-                return [
-                    'type' => $borrowing->returned_at ? 'return' : 'borrow',
-                    'description' => $borrowing->returned_at
-                        ? 'Returned book'
-                        : 'Borrowed book',
-                    'user' => $borrowing->user->name,
-                    'datetime' => $borrowing->returned_at
-                        ? $borrowing->returned_at->toISOString()
-                        : $borrowing->borrowed_at->toISOString(),
-                    'time' => $borrowing->returned_at
-                        ? $borrowing->returned_at->diffForHumans()
-                        : $borrowing->borrowed_at->diffForHumans(),
-                ];
-            });
+            ->map(fn ($borrowing) => [
+                'type' => $borrowing->returned_at ? 'return' : 'borrow',
+                'description' => $borrowing->returned_at
+                    ? 'Returned book'
+                    : 'Borrowed book',
+                'user' => $borrowing->user->name,
+                'datetime' => $borrowing->returned_at
+                    ? $borrowing->returned_at->toISOString()
+                    : $borrowing->borrowed_at->toISOString(),
+                'time' => $borrowing->returned_at
+                    ? $borrowing->returned_at->diffForHumans()
+                    : $borrowing->borrowed_at->diffForHumans(),
+            ]);
 
-        $reservations = Reservation::with(['book', 'user'])
+        $reservations = Reservation::query()->with(['book', 'user'])
             ->latest()
             ->limit(3)
             ->get()
-            ->map(function ($reservation) {
-                return [
-                    'type' => 'reservation',
-                    'description' => $reservation->isFulfilled()
-                        ? 'Fulfilled reservation'
-                        : ($reservation->isCanceled()
-                            ? 'Canceled reservation'
-                            : 'Created reservation'),
-                    'user' => $reservation->user->name,
-                    'datetime' => $reservation->updated_at->toISOString(),
-                    'time' => $reservation->updated_at->diffForHumans(),
-                ];
-            });
+            ->map(fn ($reservation) => [
+                'type' => 'reservation',
+                'description' => $reservation->isFulfilled()
+                    ? 'Fulfilled reservation'
+                    : ($reservation->isCanceled()
+                        ? 'Canceled reservation'
+                        : 'Created reservation'),
+                'user' => $reservation->user->name,
+                'datetime' => $reservation->updated_at->toISOString(),
+                'time' => $reservation->updated_at->diffForHumans(),
+            ]);
 
-        $users = User::latest()
+        $users = User::query()->latest()
             ->limit(2)
             ->get()
-            ->map(function ($user) {
-                return [
-                    'type' => 'user',
-                    'description' => 'Registered',
-                    'user' => $user->name,
-                    'datetime' => $user->created_at->toISOString(),
-                    'time' => $user->created_at->diffForHumans(),
-                ];
-            });
+            ->map(fn ($user) => [
+                'type' => 'user',
+                'description' => 'Registered',
+                'user' => $user->name,
+                'datetime' => $user->created_at->toISOString(),
+                'time' => $user->created_at->diffForHumans(),
+            ]);
 
         return $borrowings->concat($reservations)->concat($users)
             ->sortByDesc('datetime')

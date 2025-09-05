@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ReservationPolicy
+final class ReservationPolicy
 {
     use HandlesAuthorization;
 

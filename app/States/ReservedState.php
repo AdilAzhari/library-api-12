@@ -7,7 +7,7 @@ namespace App\States;
 use App\Enum\BookStatus;
 use App\Exceptions\BookNotAvailableException;
 
-class ReservedState extends BookStatusState
+final class ReservedState extends BookStatusState
 {
     /**
      * @throws BookNotAvailableException

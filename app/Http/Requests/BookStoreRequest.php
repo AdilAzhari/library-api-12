@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
-class BookStoreRequest
+final class BookStoreRequest
 {
     public function authorize(): bool
     {

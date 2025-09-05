@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class BookPolicy
+final class BookPolicy
 {
     use HandlesAuthorization;
 

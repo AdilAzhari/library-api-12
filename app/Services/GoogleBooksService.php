@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 
-class GoogleBooksService
+final class GoogleBooksService
 {
     public function searchBooks($query): array
     {

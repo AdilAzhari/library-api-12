@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
-class StoreBorrowingRequest
+final class StoreBorrowingRequest
 {
     public function authorize(): true
     {

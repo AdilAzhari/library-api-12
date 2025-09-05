@@ -6,10 +6,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Borrow;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class AdminReportController extends Controller
+final class AdminReportController extends Controller
 {
     public function borrowings()
     {
@@ -44,7 +46,7 @@ class AdminReportController extends Controller
                 $endDate = Carbon::now();
         }
 
-        $borrowings = Borrow::with(['book', 'user'])
+        $borrowings = App\Models\Borrow::query()->with(['book', 'user'])
             ->whereBetween('borrowed_at', [$startDate, $endDate])
             ->orderBy('borrowed_at', 'desc')
             ->paginate(20);
@@ -68,7 +70,7 @@ class AdminReportController extends Controller
 
     public function overdue()
     {
-        $overdueBorrowings = Borrow::with(['book', 'user'])
+        $overdueBorrowings = App\Models\Borrow::query()->with(['book', 'user'])
             ->overdue()
             ->orderBy('due_date')
             ->paginate(20);
@@ -76,6 +78,164 @@ class AdminReportController extends Controller
         return Inertia::render('Admin/Reports/Overdue', [
             'borrowings' => $overdueBorrowings,
         ]);
+    }
+
+    public function exportBorrowingsCSV()
+    {
+        $startDate = Carbon::parse(request('start_date', Carbon::now()->subMonth()))->startOfDay();
+        $endDate = Carbon::parse(request('end_date', Carbon::now()))->endOfDay();
+
+        $borrowings = App\Models\Borrow::query()->with(['book', 'user'])
+            ->whereBetween('borrowed_at', [$startDate, $endDate])
+            ->orderBy('borrowed_at')
+            ->get();
+
+        $filename = "borrowings_report_{$startDate->format('Y-m-d')}_to_{$endDate->format('Y-m-d')}.csv";
+
+        // Clear any previous output
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($borrowings): void {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for Excel compatibility
+            fwrite($file, "\xEF\xBB\xBF");
+
+            // Header row
+            fputcsv($file, [
+                'Book Title',
+                'Book Author',
+                'User Name',
+                'User Email',
+                'Borrowed Date',
+                'Due Date',
+                'Returned Date',
+                'Status',
+            ]);
+
+            // Data rows
+            foreach ($borrowings as $borrowing) {
+                fputcsv($file, [
+                    $borrowing->book->title,
+                    $borrowing->book->author,
+                    $borrowing->user->name,
+                    $borrowing->user->email,
+                    $borrowing->borrowed_at->format('Y-m-d'),
+                    $borrowing->due_date->format('Y-m-d'),
+                    $borrowing->returned_at?->format('Y-m-d') ?? '',
+                    $borrowing->status,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function exportBorrowingsPDF()
+    {
+
+        $startDate = request('start_date', Carbon::now()->subMonth());
+        $endDate = request('end_date', Carbon::now());
+
+        $borrowings = App\Models\Borrow::query()->with(['book', 'user'])
+            ->whereBetween('borrowed_at', [$startDate, $endDate])
+            ->orderBy('borrowed_at')
+            ->get();
+        $pdf = Pdf::loadView('admin.reports.borrowings_pdf', [
+            'borrowings' => $borrowings,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ]);
+
+        $filename = "borrowings_report_{$startDate->format('Y-m-d')}_to_{$endDate->format('Y-m-d')}.pdf";
+
+        return $pdf->download($filename);
+    }
+
+    public function exportCSV(Request $request)
+    {
+        $search = $request->input('search');
+        $status = $request->input('status');
+
+        $borrowings = Borrow::query()
+            ->with(['book', 'user'])
+            ->when($search, function ($query, $search): void {
+                $query->whereHas('book', function ($q) use ($search): void {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('author', 'like', "%{$search}%");
+                })
+                    ->orWhereHas('user', function ($q) use ($search): void {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            })
+            ->when($status, function ($query, $status): void {
+                if ($status === 'active') {
+                    $query->whereNull('returned_at')->where('due_date', '>=', now());
+                } elseif ($status === 'overdue') {
+                    $query->whereNull('returned_at')->where('due_date', '<', now());
+                } elseif ($status === 'returned') {
+                    $query->whereNotNull('returned_at');
+                }
+            })
+            ->orderBy('borrowed_at', 'desc')
+            ->get();
+
+        $filename = 'borrowings_export_'.now()->format('Y-m-d').'.csv';
+
+        $headers = [
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($borrowings): void {
+            $file = fopen('php://output', 'w');
+
+            // Header row
+            fputcsv($file, [
+                'Book Title',
+                'Book Author',
+                'User Name',
+                'User Email',
+                'Borrowed Date',
+                'Due Date',
+                'Returned Date',
+                'Status',
+            ]);
+
+            // Data rows
+            foreach ($borrowings as $borrowing) {
+                fputcsv($file, [
+                    $borrowing->book->title,
+                    $borrowing->book->author,
+                    $borrowing->user->name,
+                    $borrowing->user->email,
+                    $borrowing->borrowed_at->format('Y-m-d'),
+                    $borrowing->due_date->format('Y-m-d'),
+                    $borrowing->returned_at?->format('Y-m-d') ?? '',
+                    $borrowing->returned_at ? 'Returned' : ($borrowing->due_date < now() ? 'Overdue' : 'Active'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     protected function generateBorrowingsChartData($startDate, $endDate)
@@ -135,88 +295,10 @@ class AdminReportController extends Controller
             ->orderByDesc('borrow_count')
             ->limit(5)
             ->get()
-            ->map(function ($item) {
-                return [
-                    'title' => $item->book->title,
-                    'author' => $item->book->author,
-                    'borrow_count' => $item->borrow_count,
-                ];
-            });
-    }
-
-    public function exportBorrowingsCSV()
-    {
-        $startDate = request('start_date', Carbon::now()->subMonth());
-        $endDate = request('end_date', Carbon::now());
-
-        $borrowings = Borrow::with(['book', 'user'])
-            ->whereBetween('borrowed_at', [$startDate, $endDate])
-            ->orderBy('borrowed_at')
-            ->get();
-
-        $filename = "borrowings_report_{$startDate->format('Y-m-d')}_to_{$endDate->format('Y-m-d')}.csv";
-
-        $headers = [
-            'Content-type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=$filename",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
-
-        $callback = function () use ($borrowings) {
-            $file = fopen('php://output', 'w');
-
-            // Header row
-            fputcsv($file, [
-                'Book Title',
-                'Book Author',
-                'User Name',
-                'User Email',
-                'Borrowed Date',
-                'Due Date',
-                'Returned Date',
-                'Status',
+            ->map(fn ($item) => [
+                'title' => $item->book->title,
+                'author' => $item->book->author,
+                'borrow_count' => $item->borrow_count,
             ]);
-
-            // Data rows
-            foreach ($borrowings as $borrowing) {
-                fputcsv($file, [
-                    $borrowing->book->title,
-                    $borrowing->book->author,
-                    $borrowing->user->name,
-                    $borrowing->user->email,
-                    $borrowing->borrowed_at->format('Y-m-d'),
-                    $borrowing->due_date->format('Y-m-d'),
-                    $borrowing->returned_at?->format('Y-m-d') ?? '',
-                    $borrowing->status,
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    public function exportBorrowingsPDF()
-    {
-        $startDate = request('start_date', Carbon::now()->subMonth());
-        $endDate = request('end_date', Carbon::now());
-
-        $borrowings = Borrow::with(['book', 'user'])
-            ->whereBetween('borrowed_at', [$startDate, $endDate])
-            ->orderBy('borrowed_at')
-            ->get();
-
-        $pdf = PDF::loadView('admin.reports.borrowings_pdf', [
-            'borrowings' => $borrowings,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
-        ]);
-
-        $filename = "borrowings_report_{$startDate->format('Y-m-d')}_to_{$endDate->format('Y-m-d')}.pdf";
-
-        return $pdf->download($filename);
     }
 }

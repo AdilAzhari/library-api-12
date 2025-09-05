@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTO\ReserveBookDTO;
@@ -13,7 +15,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ReservationService
+final class ReservationService
 {
     /**
      * Reserve a book.
@@ -48,7 +50,7 @@ class ReservationService
      */
     public function listReservations(array $filters = [], string $sortBy = 'reserved_at', string $sortOrder = 'desc', int $perPage = 10): LengthAwarePaginator
     {
-        $query = Reservation::with(['book', 'user']);
+        $query = Reservation::with(['book.activeBorrow', 'book.activeReservation', 'user']);
 
         // Apply filters
         if (isset($filters['user_id'])) {
@@ -78,7 +80,7 @@ class ReservationService
     public function getReservation(int $reservationId): Reservation
     {
         try {
-            return Reservation::with(['book', 'user'])->findOrFail($reservationId);
+            return Reservation::with(['book.activeBorrow', 'book.activeReservation', 'user'])->findOrFail($reservationId);
         } catch (Exception $e) {
             Log::error('Error fetching reservation: '.$e->getMessage());
             throw new Exception('Failed to fetch reservation. Please try again.');
@@ -132,7 +134,7 @@ class ReservationService
         int $perPage = 10
     ): LengthAwarePaginator {
         try {
-            $query = Reservation::with(['book', 'borrowing'])
+            $query = Reservation::with(['book.activeBorrow', 'book.activeReservation', 'borrowing'])
                 ->where('user_id', $userId)
                 ->whereNull('canceled_at');
 
@@ -170,6 +172,25 @@ class ReservationService
         } catch (Exception $e) {
             Log::error('Failed to fetch user reservations: '.$e->getMessage());
             throw new Exception('Failed to retrieve reservations. Please try again.');
+        }
+    }
+
+    /**
+     * Get a single reservation for a user
+     *
+     * @throws Exception
+     */
+    public function getUserReservation(int $reservationId, int $userId): ?Reservation
+    {
+        try {
+            return Reservation::with(['book.activeBorrow', 'book.activeReservation', 'borrowing'])
+                ->where('id', $reservationId)
+                ->where('user_id', $userId)
+                ->whereNull('canceled_at')
+                ->first();
+        } catch (Exception $e) {
+            Log::error('Failed to fetch user reservation: '.$e->getMessage());
+            throw new Exception('Failed to retrieve reservation. Please try again.');
         }
     }
 
@@ -224,7 +245,7 @@ class ReservationService
      */
     public function cancelReservation(int $reservationId, int $userId): void
     {
-        DB::transaction(function () use ($reservationId, $userId) {
+        DB::transaction(function () use ($reservationId, $userId): void {
             try {
                 $reservation = Reservation::query()->where('id', $reservationId)
                     ->where('user_id', $userId)
@@ -274,7 +295,7 @@ class ReservationService
     public function getActiveReservationsForUser(int $userId)
     {
         return Reservation::activeForUser($userId)
-            ->with('book')
+            ->with(['book.activeBorrow', 'book.activeReservation'])
             ->orderBy('expires_at')
             ->get();
     }

@@ -1,22 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\Book;
-use App\Models\User;
 use App\Models\Borrow;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
-    $this->user = User::factory()->create();
-    $this->book = Book::factory()->create(['is_borrowed' => false]);
+beforeEach(function (): void {
+    $this->user = User::factory()->create(['role' => \App\Enum\UserRoles::ADMIN]); // Make user admin to bypass reservation requirement
+    $this->book = Book::factory()->create(['status' => 'available']);
+    $this->token = $this->user->createToken('test-token')->plainTextToken;
     $this->actingAs($this->user);
 });
 
-it('borrows a book', function () {
-    $response = $this->postJson('/api/v1/borrow', [
+it('borrows a book', function (): void {
+    $response = $this->postJson('/api/public/v1/borrow', [
         'book_id' => $this->book->id,
         'user_id' => $this->user->id,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
     ]);
 
     $response->assertStatus(201)
@@ -28,10 +33,10 @@ it('borrows a book', function () {
         'returned_at' => null,
     ]);
 
-    $this->assertTrue(Book::query()->find($this->book->id)->is_borrowed);
+    $this->assertEquals('borrowed', Book::query()->find($this->book->id)->status->value);
 });
 
-it('returns a borrowed book', function () {
+it('returns a borrowed book', function (): void {
     $borrowing = Borrow::factory()->create([
         'book_id' => $this->book->id,
         'user_id' => $this->user->id,
@@ -39,9 +44,11 @@ it('returns a borrowed book', function () {
         'returned_at' => null,
     ]);
 
-    $response = $this->postJson('/api/v1/return', [
+    $response = $this->postJson('/api/public/v1/return', [
         'book_id' => $this->book->id,
         'user_id' => $this->user->id,
+    ], [
+        'Authorization' => 'Bearer '.$this->token,
     ]);
 
     $response->assertStatus(200)
@@ -50,8 +57,13 @@ it('returns a borrowed book', function () {
     $this->assertDatabaseHas('borrows', [
         'book_id' => $this->book->id,
         'user_id' => $this->user->id,
-        'returned_at' => now(),
     ]);
 
-    $this->assertFalse(Book::query()->find($this->book->id)->is_borrowed);
+    $this->assertDatabaseMissing('borrows', [
+        'book_id' => $this->book->id,
+        'user_id' => $this->user->id,
+        'returned_at' => null,
+    ]);
+
+    $this->assertEquals('available', Book::query()->find($this->book->id)->status->value);
 });

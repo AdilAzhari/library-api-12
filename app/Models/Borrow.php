@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[ObservedBy('App\Observers\BorrowObserver')]
-class Borrow extends Model
+#[ObservedBy(\App\Observers\BorrowObserver::class)]
+final class Borrow extends Model
 {
     use HasFactory;
 
@@ -21,11 +24,18 @@ class Borrow extends Model
         'borrowed_at' => 'datetime',
         'due_date' => 'date',
         'returned_at' => 'date',
+        'status' => 'string',
+        'late_fee' => 'decimal:2',
     ];
 
     public function book(): BelongsTo
     {
         return $this->belongsTo(Book::class);
+    }
+
+    public function fines(): HasMany
+    {
+        return $this->hasMany(Fine::class);
     }
 
     public function user(): BelongsTo
@@ -66,5 +76,14 @@ class Borrow extends Model
     {
         return $query->active()
             ->where('due_date', '<', now());
+    }
+
+    public function getStatusAttribute(): string
+    {
+        if ($this->returned_at) {
+            return 'Returned';
+        }
+
+        return $this->due_date->isPast() ? 'Overdue' : 'Active';
     }
 }

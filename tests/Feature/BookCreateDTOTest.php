@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\DTO;
 
 use App\DTO\BookCreateDTO;
@@ -9,7 +11,7 @@ use Illuminate\Http\UploadedFile;
 
 uses(RefreshDatabase::class);
 
-it('initializes BookCreateDTO correctly', function () {
+it('initializes BookCreateDTO correctly', function (): void {
     $data = [
         'title' => 'Test Book',
         'author' => 'Test Author',
@@ -36,7 +38,7 @@ it('initializes BookCreateDTO correctly', function () {
         ->and($dto->cover_image)->toBe($data['cover_image']);
 });
 
-it('creates BookCreateDTO from request', function () {
+it('creates BookCreateDTO from request', function (): void {
     $request = new Request([
         'title' => 'Test Book',
         'author' => 'Test Author',

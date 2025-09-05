@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Events\BookCreated;
 use App\Models\Book;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('dispatches book created event', function () {
+it('dispatches book created event', function (): void {
     $book = Book::factory()->create();
 
     event(new BookCreated($book));

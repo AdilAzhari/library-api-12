@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTO\BorrowBookDTO;
 use App\DTO\ReturnBookDTO;
+use App\Enum\BookStatus;
 use App\Events\BookBorrowed;
 use App\Events\BookOverdue;
 use App\Events\BookReturned;
@@ -14,57 +17,110 @@ use App\Models\User;
 use Exception;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-class BorrowingService
+final class BorrowingService
 {
     public function borrowBook(BorrowBookDTO $dto): Borrow
     {
-        return DB::transaction(function () use ($dto) {
-            $book = Book::findOrFail($dto->bookId);
-            $user = User::findOrFail($dto->userId);
+        Log::info('BorrowingService::borrowBook - Starting book borrowing', [
+            'book_id' => $dto->bookId,
+            'user_id' => $dto->userId,
+            'due_date' => $dto->dueDate,
+        ]);
 
-            $this->validateBorrow($book, $user);
+        try {
+            return DB::transaction(function () use ($dto) {
+                $book = Book::query()->findOrFail($dto->bookId);
+                $user = User::query()->findOrFail($dto->userId);
 
-            $borrow = Borrow::create([
-                'book_id' => $book->id,
-                'user_id' => $user->id,
-                'borrowed_at' => $dto->borrowedAt,
-                'due_date' => $dto->dueDate,
-                'renewal_count' => 0,
+                $this->validateBorrow($book, $user);
+
+                $borrow = Borrow::query()->create([
+                    'book_id' => $book->id,
+                    'user_id' => $user->id,
+                    'borrowed_at' => $dto->borrowedAt,
+                    'due_date' => $dto->dueDate,
+                    'renewal_count' => 0,
+                ]);
+
+                $this->fulfillReservationIfExists($user->id, $book->id, $borrow->id);
+                $this->updateBookStatus($book, BookStatus::BORROWED);
+
+                event(new BookBorrowed($borrow));
+
+                Log::info('BorrowingService::borrowBook - Book borrowed successfully', [
+                    'borrow_id' => $borrow->id,
+                    'book_id' => $dto->bookId,
+                    'user_id' => $dto->userId,
+                    'due_date' => $borrow->due_date,
+                ]);
+
+                return $borrow->load('book', 'user');
+            });
+        } catch (Exception $e) {
+            Log::error('BorrowingService::borrowBook - Error borrowing book', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'book_id' => $dto->bookId,
+                'user_id' => $dto->userId,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
-            $this->fulfillReservationIfExists($user->id, $book->id, $borrow->id);
-            $this->updateBookStatus($book, 'borrowed');
-
-            event(new BookBorrowed($borrow));
-
-            return $borrow->load('book', 'user');
-        });
+            throw $e;
+        }
     }
 
     public function returnBook(ReturnBookDTO $dto): Borrow
     {
-        return DB::transaction(function () use ($dto) {
-            $borrow = Borrow::where('id', $dto->borrowId)
-                ->where('book_id', $dto->bookId)
-                ->where('user_id', $dto->userId)
-                ->whereNull('returned_at')
-                ->firstOrFail();
+        Log::info('BorrowingService::returnBook - Starting book return', [
+            'borrow_id' => $dto->borrowId ?? null,
+            'book_id' => $dto->bookId,
+            'user_id' => $dto->userId,
+        ]);
 
-            $lateFee = $this->calculateLateFee($borrow, $dto->returnedAt);
+        try {
+            return DB::transaction(function () use ($dto) {
+                $borrow = Borrow::query()->where('id', $dto->borrowId)
+                    ->where('book_id', $dto->bookId)
+                    ->where('user_id', $dto->userId)
+                    ->whereNull('returned_at')
+                    ->firstOrFail();
 
-            $borrow->update([
-                'returned_at' => $dto->returnedAt,
-                'late_fee' => $lateFee,
-                'notes' => $dto->notes ?? null,
+                $lateFee = $this->calculateLateFee($borrow, $dto->returnedAt);
+
+                $borrow->update([
+                    'returned_at' => $dto->returnedAt,
+                    'late_fee' => $lateFee,
+                    'notes' => $dto->notes ?? null,
+                ]);
+
+                $this->updateBookStatus($borrow->book, BookStatus::AVAILABLE);
+
+                event(new BookReturned($borrow));
+
+                Log::info('BorrowingService::returnBook - Book returned successfully', [
+                    'borrow_id' => $borrow->id,
+                    'book_id' => $dto->bookId,
+                    'user_id' => $dto->userId,
+                    'late_fee' => $lateFee,
+                ]);
+
+                return $borrow->load('book', 'user');
+            });
+        } catch (Exception $e) {
+            Log::error('BorrowingService::returnBook - Error returning book', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'book_id' => $dto->bookId,
+                'user_id' => $dto->userId,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
-            $this->updateBookStatus($borrow->book, 'Available');
-
-            event(new BookReturned($borrow));
-
-            return $borrow->load('book', 'user');
-        });
+            throw $e;
+        }
     }
 
     public function renewBorrow(Borrow $borrow, int $days = 14): Borrow
@@ -89,7 +145,7 @@ class BorrowingService
         int $perPage = 10,
         ?string $search = null
     ): LengthAwarePaginator {
-        $query = Borrow::with('book', 'user')
+        $query = Borrow::query()->with('book', 'user')
             ->where('user_id', $userId);
 
         $this->applyFilters($query, $status, $sortBy, $sortOrder, $search);
@@ -104,7 +160,7 @@ class BorrowingService
         int $perPage = 15,
         ?string $search = null
     ): LengthAwarePaginator {
-        $query = Borrow::with(['book', 'user']);
+        $query = Borrow::query()->with(['book', 'user']);
 
         $this->applyFilters($query, $status, $sortBy, $sortOrder, $search);
 
@@ -113,45 +169,61 @@ class BorrowingService
 
     public function getBorrowDetails(int $id): Borrow
     {
-        return Borrow::with(['book', 'user', 'fulfilledReservation'])
+        return Borrow::query()->with(['book', 'user', 'fulfilledReservation'])
             ->findOrFail($id);
     }
 
     public function getBookBorrowHistory(int $bookId, int $perPage = 5): LengthAwarePaginator
     {
-        return Borrow::with('user')
+        return Borrow::query()->with('user')
             ->where('book_id', $bookId)
             ->orderBy('borrowed_at', 'desc')
             ->paginate($perPage);
+    }
+
+    public function renewBook(Borrow $borrow): Borrow
+    {
+        return $this->renewBorrow($borrow);
+    }
+
+    public function canRenewBook(Borrow $borrow): bool
+    {
+        return $this->canRenew($borrow);
     }
 
     public function canRenew(Borrow $borrow): bool
     {
         return $borrow->returned_at === null
             && $borrow->renewal_count < config('library.max_renewals', 2)
-            && ! $borrow->isOverdue();
+            && ! $borrow->isOverdue()
+            && ! $borrow->book->hasPendingReservations();
     }
 
     public function checkOverdueBooks(): void
     {
         Borrow::overdue()
             ->get()
-            ->each(function ($borrow) {
+            ->each(function ($borrow): void {
                 event(new BookOverdue($borrow));
             });
+    }
+
+    public function deleteBorrow(int $id): void
+    {
+        Borrow::query()->where('id', $id)->delete();
     }
 
     /**
      * @throws Exception
      */
-    protected function validateBorrow(Book $book, User $user): void
+    private function validateBorrow(Book $book, User $user): void
     {
-        if (! $book->is_available) {
+        if (! $book->canBeBorrowed()) {
             throw new Exception('This book is not currently available for borrowing');
         }
 
         // Check if user has reached max borrow limit
-        $currentBorrows = Borrow::where('user_id', $user->id)
+        $currentBorrows = Borrow::query()->where('user_id', $user->id)
             ->whereNull('returned_at')
             ->count();
 
@@ -167,7 +239,7 @@ class BorrowingService
     /**
      * @throws Exception
      */
-    protected function validateRenewal(Borrow $borrow): void
+    private function validateRenewal(Borrow $borrow): void
     {
         if ($borrow->returned_at) {
             throw new Exception('Cannot renew a returned book');
@@ -181,11 +253,11 @@ class BorrowingService
             throw new Exception('Cannot renew an overdue book');
         }
         if (! $borrow->book->canBeRenewed()) {
-            throw new \Exception('This book cannot be renewed at this time');
+            throw new Exception('This book cannot be renewed at this time');
         }
     }
 
-    protected function calculateLateFee(Borrow $borrow, ?string $returnedAt = null): float
+    private function calculateLateFee(Borrow $borrow, ?string $returnedAt = null): float
     {
         $returnDate = $returnedAt ? now()->parse($returnedAt) : now();
         $gracePeriod = config('library.grace_period_days', 1);
@@ -199,7 +271,7 @@ class BorrowingService
         return 0;
     }
 
-    protected function fulfillReservationIfExists(int $userId, int $bookId, int $borrowId): void
+    private function fulfillReservationIfExists(int $userId, int $bookId, int $borrowId): void
     {
         Reservation::activeForUser($userId, $bookId)
             ->first()?->update([
@@ -208,17 +280,17 @@ class BorrowingService
             ]);
     }
 
-    protected function updateBookStatus(Book $book, string $status): void
+    private function updateBookStatus(Book $book, BookStatus $status): void
     {
         $book->update(['status' => $status]);
     }
 
-    protected function hasActiveReservation(int $userId, int $bookId): bool
+    private function hasActiveReservation(int $userId, int $bookId): bool
     {
         return Reservation::activeForUser($userId, $bookId)->exists();
     }
 
-    protected function applyFilters($query, ?string $status, string $sortBy, string $sortOrder, ?string $search): void
+    private function applyFilters($query, ?string $status, string $sortBy, string $sortOrder, ?string $search): void
     {
         // Apply status filter
         match ($status) {
@@ -230,11 +302,11 @@ class BorrowingService
 
         // Apply search filter
         if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('book', function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
+                $q->whereHas('book', function ($q) use ($search): void {
                     $q->where('title', 'like', "%$search%")
                         ->orWhere('author', 'like', "%$search%");
-                })->orWhereHas('user', function ($q) use ($search) {
+                })->orWhereHas('user', function ($q) use ($search): void {
                     $q->where('name', 'like', "%$search%");
                 });
             });
@@ -258,10 +330,5 @@ class BorrowingService
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
-    }
-
-    public function deleteBorrow(int $id): void
-    {
-        Borrow::query()->where('id', $id)->delete();
     }
 }

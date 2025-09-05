@@ -1,115 +1,71 @@
 <?php
 
-use App\Http\Controllers\Front\BookController;
-use App\Http\Controllers\Front\BorrowController;
-use App\Http\Controllers\Front\ReservationController;
-use App\Http\Controllers\Front\ReviewController;
+declare(strict_types=1);
+
+use App\Http\Controllers\BookController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GenreController;
+use App\Http\Controllers\NewReleasesController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RecommendationsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+// Public Landing Page
+Route::get('/', fn () => Inertia::render('Welcome', [
+    'canLogin' => Route::has('login'),
+    'canRegister' => Route::has('register'),
+    'laravelVersion' => Application::VERSION,
+    'phpVersion' => PHP_VERSION,
+]))->name('home');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Public book catalog
+Route::get('/books', [BookController::class, 'index'])->name('books.index');
+Route::get('/books/{book}', [BookController::class, 'show'])->name('books.show');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Public genre browsing
+Route::get('/genres', [GenreController::class, 'index'])->name('genres.index');
+Route::get('/genres/{genre}', [GenreController::class, 'show'])->name('genres.show');
+
+// Public new releases
+Route::get('/new-releases', [NewReleasesController::class, 'index'])->name('new-releases.index');
+
+// Public recommendations
+Route::get('/recommendations', [RecommendationsController::class, 'index'])->name('recommendations.index');
+
+// Authenticated book actions
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::post('/books/{book}/borrow', [BookController::class, 'borrow'])->name('books.borrow');
+    Route::post('/books/{book}/reserve', [BookController::class, 'reserve'])->name('books.reserve');
+    Route::post('/books/{book}/reviews', [BookController::class, 'review'])->name('books.reviews.store');
 });
 
 require __DIR__.'/auth.php';
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-Route::middleware(['throttle:60,1', 'auth'])->group(function () {
+// Authenticated User Routes
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    // Dashboard & Profile (Central hub with overdue checking)
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware(['overdue.check'])
+        ->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('about', function () {
-        return Inertia::render('AboutPage');
-    });
+    // User Flow Based Route Organization
+    require __DIR__.'/borrowing.php';      // Borrowing workflow routes
+    require __DIR__.'/reservations.php';   // Reservation workflow routes
+    require __DIR__.'/fines.php';          // Overdue/fines workflow routes
 
-    Route::get('terms', function () {
-        return Inertia::render('TermsPage');
-    });
-
-    Route::get('privacyPolicy', function () {
-        return Inertia::render('PrivacyPolicy');
-    });
-
-    Route::get('contact', function () {
-        return Inertia::render('ContactPage');
-    });
-
-    Route::get('careers', function () {
-        return Inertia::render('Careers');
-    });
-
-    Route::get('blog', function () {
-        return Inertia::render('Blog');
-    });
-
-    Route::get('sitemap', function () {
-        return Inertia::render('Sitemap');
-    });
-
-    Route::get('cookies', function () {
-        return Inertia::render('CookiePolicy');
-    });
-
-    // Books
-
-    Route::resources([
-        'books' => BookController::class,
-        'reservations' => ReservationController::class,
-        'borrows' => BorrowController::class,
-    ]);
-
-    Route::resource('reviews', ReviewController::class)->except(['index', 'show']);
-
-    route::controller(BookController::class)
-        ->prefix('books')
-        ->group(function () {
-            Route::post('/{book}/borrow', 'borrow');
-            Route::post('/{book}/reviews', 'review');
-            Route::post('/books/drafts', 'draft');
-            Route::post('/{book}/reserve', 'reserve');
-        });
-
-    // Reservations
-
-    Route::controller(ReservationController::class)
-        ->prefix('reservations')
-        ->group(function () {
-            Route::post('/{reservation}/fulfill', 'fulfill')->name('reservations.fulfill');
-            Route::post('/{reservation}/cancel', 'cancel')->name('reservations.cancel');
-        });
-
-    // Borrows
-    Route::controller(BorrowController::class)
-        ->prefix('borrows')
-        ->group(function () {
-            Route::post('/{borrow}/return', 'return')->name('borrows.return');
-        });
+    // Static Pages
+    Route::get('/about', fn () => Inertia::render('AboutPage'))->name('about');
+    Route::get('/terms', fn () => Inertia::render('TermsPage'))->name('terms');
+    Route::get('/privacy', fn () => Inertia::render('PrivacyPolicy'))->name('privacy');
+    Route::get('/contact', fn () => Inertia::render('ContactPage'))->name('contact');
 });
-require __DIR__.'/auth.php';
+
 require __DIR__.'/Admin.php';
+Route::get('hello', function () {
+    return Auth::check() ? Auth::user()->role->value : false;
+});

@@ -1,24 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 use App\DTO\BorrowBookDTO;
 use App\DTO\ReturnBookDTO;
 use App\Models\Book;
-use App\Models\User;
 use App\Models\Borrow;
+use App\Models\User;
 use App\Services\BorrowingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-beforeEach(function () {
-    $this->service = new BorrowingService();
-    $this->user = User::factory()->create();
-    $this->book = Book::factory()->create(['is_borrowed' => false]);
+beforeEach(function (): void {
+    $this->service = new BorrowingService;
+    $this->user = User::factory()->create(['role' => \App\Enum\UserRoles::ADMIN]); // Make user admin to bypass reservation requirement
+    $this->book = Book::factory()->create(['status' => 'available']);
 });
 
 it(/**
  * @throws Exception
- */ 'borrows a book', function () {
+ */ 'borrows a book', function (): void {
     $dto = new BorrowBookDTO($this->book->id, $this->user->id);
 
     $borrowing = $this->service->borrowBook($dto);
@@ -28,12 +30,12 @@ it(/**
         ->and($borrowing->user_id)->toBe($this->user->id)
         ->and($borrowing->returned_at)->toBeNull();
 
-    $this->assertTrue(Book::query()->find($this->book->id)->is_borrowed);
+    $this->assertEquals('borrowed', Book::query()->find($this->book->id)->status->value);
 });
 
 it(/**
  * @throws Exception
- */ 'returns a borrowed book', function () {
+ */ 'returns a borrowed book', function (): void {
     $borrowing = Borrow::factory()->create([
         'book_id' => $this->book->id,
         'user_id' => $this->user->id,
@@ -41,12 +43,12 @@ it(/**
         'returned_at' => null,
     ]);
 
-    $dto = new ReturnBookDTO($this->book->id, $this->user->id);
+    $dto = new ReturnBookDTO($borrowing->id, $this->book->id, $this->user->id);
 
     $returnedBorrowing = $this->service->returnBook($dto);
 
     expect($returnedBorrowing)->toBeInstanceOf(Borrow::class)
         ->and($returnedBorrowing->returned_at)->not->toBeNull();
 
-    $this->assertFalse(Book::find($this->book->id)->is_borrowed);
+    $this->assertEquals('available', Book::query()->find($this->book->id)->status->value);
 });

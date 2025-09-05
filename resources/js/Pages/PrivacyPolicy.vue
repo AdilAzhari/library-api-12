@@ -49,7 +49,7 @@
             </div>
         </main>
 
-        <AppFooter />
+        <AppFooter :year="new Date().getFullYear()" />
     </div>
 </template>
 

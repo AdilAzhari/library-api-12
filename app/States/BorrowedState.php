@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\States;
 
 use App\Enum\BookStatus;
 use App\Exceptions\BookNotAvailableException;
 
-class BorrowedState extends BookStatusState
+final class BorrowedState extends BookStatusState
 {
     /**
      * @throws BookNotAvailableException

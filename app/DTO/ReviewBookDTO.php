@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO;
 
-class ReviewBookDTO
+final class ReviewBookDTO
 {
     /**
      * Create a new class instance.

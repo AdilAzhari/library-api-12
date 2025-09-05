@@ -5,9 +5,18 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import {Link} from '@inertiajs/vue3';
+import {Link, router} from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const searchQuery = ref('');
+
+const performSearch = () => {
+    if (searchQuery.value.trim()) {
+        router.get(route('books.index'), {
+            search: searchQuery.value.trim()
+        });
+    }
+};
 </script>
 
 <template>
@@ -30,23 +39,103 @@ const showingNavigationDropdown = ref(false);
                                                       d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                             </svg>
                                         </div>
-                                        <span
-                                            class="text-xl font-serif font-bold hidden md:block">Academia Inspired</span>
+                                        <div class="hidden md:block">
+                                            <span class="text-xl font-serif font-bold">BiblioTech Hub</span>
+                                            <p class="text-xs text-amber-300">Your Gateway to Knowledge</p>
+                                        </div>
                                     </div>
                                 </Link>
                             </div>
 
                             <!-- Primary Navigation -->
                             <div class="hidden sm:ml-10 sm:block">
-                                <div class="flex space-x-4">
+                                <div class="flex space-x-6">
                                     <NavLink
                                         :href="route('dashboard')"
                                         :active="route().current('dashboard')"
-                                        class="hover:text-amber-300 transition-colors"
+                                        class="hover:text-amber-300 transition-colors duration-200 flex items-center space-x-1"
                                     >
-                                        Dashboard
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"/>
+                                        </svg>
+                                        <span>Dashboard</span>
                                     </NavLink>
-                                    <!-- Add more nav links as needed -->
+
+                                    <NavLink
+                                        :href="route('books.index')"
+                                        :active="route().current('books.*')"
+                                        class="hover:text-amber-300 transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                        </svg>
+                                        <span>Browse Books</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        href="/genres"
+                                        :active="route().current('genres.*')"
+                                        class="hover:text-amber-300 transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14-7H3a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z"/>
+                                        </svg>
+                                        <span>Genres</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        href="/new-releases"
+                                        :active="route().current('new-releases')"
+                                        class="hover:text-amber-300 transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                        </svg>
+                                        <span>New Releases</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        href="/recommendations"
+                                        :active="route().current('recommendations')"
+                                        class="hover:text-amber-300 transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                        </svg>
+                                        <span>Recommendations</span>
+                                    </NavLink>
+
+                                    <NavLink
+                                        :href="route('borrows.index')"
+                                        :active="route().current('borrows.*')"
+                                        class="hover:text-amber-300 transition-colors duration-200 flex items-center space-x-1"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                        </svg>
+                                        <span>My Books</span>
+                                    </NavLink>
+                                </div>
+                            </div>
+
+                            <!-- Search Bar -->
+                            <div class="hidden md:flex md:flex-1 md:justify-center md:ml-8">
+                                <div class="w-full max-w-lg">
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            placeholder="Search books, authors, genres..."
+                                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 focus:outline-none focus:placeholder-gray-300 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 text-gray-900"
+                                            @keyup.enter="performSearch"
+                                            v-model="searchQuery"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -145,12 +234,70 @@ const showingNavigationDropdown = ref(false);
                     class="sm:hidden bg-[#34495e]"
                 >
                     <div class="space-y-1 px-2 pt-2 pb-3">
+                        <!-- Mobile Search -->
+                        <div class="px-3 py-2">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Search books..."
+                                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 text-gray-900 text-sm"
+                                    @keyup.enter="performSearch"
+                                    v-model="searchQuery"
+                                />
+                            </div>
+                        </div>
+
                         <ResponsiveNavLink
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
                             class="text-white hover:bg-[#3d5166] hover:text-amber-300"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        
+                        <ResponsiveNavLink
+                            :href="route('books.index')"
+                            :active="route().current('books.*')"
+                            class="text-white hover:bg-[#3d5166] hover:text-amber-300"
+                        >
+                            Browse Books
+                        </ResponsiveNavLink>
+                        
+                        <ResponsiveNavLink
+                            href="/genres"
+                            :active="route().current('genres.*')"
+                            class="text-white hover:bg-[#3d5166] hover:text-amber-300"
+                        >
+                            Genres
+                        </ResponsiveNavLink>
+                        
+                        <ResponsiveNavLink
+                            href="/new-releases"
+                            :active="route().current('new-releases')"
+                            class="text-white hover:bg-[#3d5166] hover:text-amber-300"
+                        >
+                            New Releases
+                        </ResponsiveNavLink>
+                        
+                        <ResponsiveNavLink
+                            href="/recommendations"
+                            :active="route().current('recommendations')"
+                            class="text-white hover:bg-[#3d5166] hover:text-amber-300"
+                        >
+                            Recommendations
+                        </ResponsiveNavLink>
+                        
+                        <ResponsiveNavLink
+                            :href="route('borrows.index')"
+                            :active="route().current('borrows.*')"
+                            class="text-white hover:bg-[#3d5166] hover:text-amber-300"
+                        >
+                            My Books
                         </ResponsiveNavLink>
                     </div>
 

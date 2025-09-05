@@ -1,14 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Book;
 use App\Http\Requests\Admin\StoreBookRequest;
 use App\Http\Requests\Admin\UpdateBookRequest;
+use App\Models\Book;
 use Inertia\Inertia;
 
-class BookController extends Controller
+final class BookController extends Controller
 {
     public function index()
     {
@@ -17,14 +19,14 @@ class BookController extends Controller
                 ->filter(request()->only('search', 'status'))
                 ->paginate(10)
                 ->withQueryString(),
-            'filters' => request()->all('search', 'status')
+            'filters' => request()->all('search', 'status'),
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Admin/Books/Form', [
-            'genres' => \App\Models\Genre::all()
+            'genres' => \App\Models\Genre::all(),
         ]);
     }
 
@@ -40,7 +42,7 @@ class BookController extends Controller
     {
         return Inertia::render('Admin/Books/Form', [
             'book' => $book,
-            'genres' => \App\Models\Genre::all()
+            'genres' => \App\Models\Genre::all(),
         ]);
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Events;
 
 use App\Models\Book;
@@ -11,14 +13,14 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Spatie\EventSourcing\StoredEvents\ShouldBeStored;
 
-class BookCreated extends ShouldBeStored implements ShouldBroadcast
+final class BookCreated extends ShouldBeStored implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public book $book) {}
+    public function __construct(public Book $book) {}
 
     /**
      * Get the channels the event should broadcast on.

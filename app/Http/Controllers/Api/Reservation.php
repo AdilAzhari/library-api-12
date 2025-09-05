@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\DTO\ReserveBookDTO;
@@ -8,11 +10,9 @@ use App\Services\ReservationService;
 use Exception;
 use Illuminate\Http\Request;
 
-class Reservation extends Controller
+final class Reservation extends Controller
 {
-    public function __construct(protected ReservationService $reservationService)
-    {
-    }
+    public function __construct(protected ReservationService $reservationService) {}
 
     /**
      * @throws Exception

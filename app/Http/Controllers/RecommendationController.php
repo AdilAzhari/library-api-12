@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Book;
 
-class RecommendationController extends Controller
+final class RecommendationController extends Controller
 {
     public function recommend(Book $book)
     {

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exceptions;
 
 use Exception;
 
-class BookNotAvailableException extends Exception
+final class BookNotAvailableException extends Exception
 {
     protected $message = 'This book is not available for the requested action';
 

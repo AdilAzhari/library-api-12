@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Reservation extends Model
+final class Reservation extends Model
 {
     use HasFactory;
 
@@ -84,9 +86,15 @@ class Reservation extends Model
 
     public function isExpired(): bool
     {
-        return $this->expires_at <= now()
+        return $this->expires_at->isPast()
             && ! $this->isFulfilled()
-            && $this->expires_at->isPast()
+            && ! $this->isCanceled();
+    }
+
+    public function isActive(): bool
+    {
+        return ! $this->isExpired()
+            && ! $this->isFulfilled()
             && ! $this->isCanceled();
     }
 
@@ -106,17 +114,17 @@ class Reservation extends Model
 
     public function scopeFilter($query, array $filters): void
     {
-        $query->when($filters['search'] ?? null, function ($query, $search) {
-            $query->where(function ($query) use ($search) {
-                $query->whereHas('book', function ($query) use ($search) {
+        $query->when($filters['search'] ?? null, function ($query, $search): void {
+            $query->where(function ($query) use ($search): void {
+                $query->whereHas('book', function ($query) use ($search): void {
                     $query->where('title', 'like', '%'.$search.'%');
                 })
-                    ->orWhereHas('user', function ($query) use ($search) {
+                    ->orWhereHas('user', function ($query) use ($search): void {
                         $query->where('name', 'like', '%'.$search.'%');
                     });
             });
         })
-            ->when($filters['status'] ?? null, function ($query, $status) {
+            ->when($filters['status'] ?? null, function ($query, $status): void {
                 if ($status === 'active') {
                     $query->active();
                 } elseif ($status === 'expired') {

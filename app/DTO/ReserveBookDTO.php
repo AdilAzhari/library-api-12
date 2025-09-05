@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO;
 
-use DateTime;
+use DateTimeImmutable;
 use InvalidArgumentException;
 
-class ReserveBookDTO
+final class ReserveBookDTO
 {
     public function __construct(
         public readonly int $bookId,
         public readonly int $userId,
-        public ?DateTime $expiresAt = null
+        public ?DateTimeImmutable $expiresAt = null
     ) {
         if ($this->bookId <= 0) {
             throw new InvalidArgumentException('Invalid book ID');
@@ -20,6 +22,6 @@ class ReserveBookDTO
             throw new InvalidArgumentException('Invalid user ID');
         }
 
-        $this->expiresAt = $expiresAt ?? now()->addDays(7);
+        $this->expiresAt = $expiresAt ?? now()->addDays(7)->toDateTimeImmutable();
     }
 }

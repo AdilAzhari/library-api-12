@@ -9,22 +9,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Borrow;
 use App\Models\Reservation;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
-class AdminReservationController extends Controller
+final class AdminReservationController extends Controller
 {
-    public function index()
+    public function index(): Response
     {
         return Inertia::render('Admin/Reservations/Index', [
-            'reservations' => Reservation::with(['book', 'user'])
-                ->when(request('search'), function ($query, $search) {
-                    $query->whereHas('book', function ($q) use ($search) {
-                        $q->where('title', 'like', "%{$search}%");
-                    })->orWhereHas('user', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+            'reservations' => Reservation::query()->with(['book', 'user'])
+                ->when(request('search'), function ($query, $search): void {
+                    $query->whereHas('book', function ($q) use ($search): void {
+                        $q->where('title', 'like', "%$search%");
+                    })->orWhereHas('user', function ($q) use ($search): void {
+                        $q->where('name', 'like', "%$search%");
                     });
                 })
-                ->when(request('status'), function ($query, $status) {
+                ->when(request('status'), function ($query, $status): void {
                     if ($status === 'active') {
                         $query->active();
                     } elseif ($status === 'expired') {
@@ -37,37 +39,35 @@ class AdminReservationController extends Controller
                 })
                 ->latest()
                 ->paginate(10)
-                ->through(function ($reservation) {
-                    return [
-                        'id' => $reservation->id,
-                        'book' => [
-                            'title' => $reservation->book->title,
-                            'author' => $reservation->book->author,
-                            'cover_image_url' => $reservation->book->cover_image_url,
-                        ],
-                        'user' => [
-                            'name' => $reservation->user->name,
-                            'email' => $reservation->user->email,
-                        ],
-                        'reserved_at' => $reservation->reserved_at,
-                        'expires_at' => $reservation->expires_at,
-                        'fulfilled_by_borrow_id' => $reservation->fulfilled_by_borrow_id,
-                        'canceled_at' => $reservation->canceled_at,
-                        'is_fulfilled' => $reservation->isFulfilled(),
-                        'is_canceled' => $reservation->isCanceled(),
-                        'is_expired' => $reservation->isExpired(),
-                        'is_active' => ! $reservation->isFulfilled() &&
-                            ! $reservation->isCanceled() &&
-                            $reservation->expires_at > now(),
-                    ];
-                }),
+                ->through(fn ($reservation) => [
+                    'id' => $reservation->id,
+                    'book' => [
+                        'title' => $reservation->book->title ?? 'No title',
+                        'author' => $reservation->book->author ?? 'No author',
+                        'cover_image_url' => $reservation->book->cover_image_url ?? 'No image',
+                    ],
+                    'user' => [
+                        'name' => $reservation->user->name,
+                        'email' => $reservation->user->email,
+                    ],
+                    'reserved_at' => $reservation->reserved_at,
+                    'expires_at' => $reservation->expires_at,
+                    'fulfilled_by_borrow_id' => $reservation->fulfilled_by_borrow_id,
+                    'canceled_at' => $reservation->canceled_at,
+                    'is_fulfilled' => $reservation->isFulfilled(),
+                    'is_canceled' => $reservation->isCanceled(),
+                    'is_expired' => $reservation->isExpired(),
+                    'is_active' => ! $reservation->isFulfilled() &&
+                        ! $reservation->isCanceled() &&
+                        $reservation->expires_at > now(),
+                ]),
             'filters' => request()->only(['search', 'status']),
         ]);
     }
 
-    public function fulfill(Reservation $reservation)
+    public function fulfill(Reservation $reservation): RedirectResponse
     {
-        $borrowing = Borrow::create([
+        $borrowing = Borrow::query()->create([
             'book_id' => $reservation->book_id,
             'user_id' => $reservation->user_id,
             'borrowed_at' => now(),
@@ -80,12 +80,12 @@ class AdminReservationController extends Controller
         ]);
 
         // Update book status
-        $reservation->book->update(['status' => BookStatus::STATUS_AVAILABLE->value]);
+        $reservation->book->update(['status' => BookStatus::AVAILABLE->value]);
 
         return back()->with('success', 'Reservation fulfilled successfully');
     }
 
-    public function cancel(Reservation $reservation)
+    public function cancel(Reservation $reservation): RedirectResponse
     {
         $reservation->update([
             'canceled_at' => now(),

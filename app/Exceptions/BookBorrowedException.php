@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exceptions;
 
 use Exception;
 
-class BookBorrowedException extends Exception
+final class BookBorrowedException extends Exception
 {
     protected $message = 'This book is currently borrowed';
 

@@ -12,27 +12,27 @@ use App\Models\User;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
-class AdminBorrowingController extends Controller
+final class AdminBorrowingController extends Controller
 {
     public function index()
     {
         $searchQuery = request()->search;
         $status = request()->status;
 
-        $borrowings = Borrow::with(['book', 'user'])
-            ->when($searchQuery, function ($query) use ($searchQuery) {
-                $query->where(function ($q) use ($searchQuery) {
-                    $q->whereHas('book', function ($bookQuery) use ($searchQuery) {
+        $borrowings = Borrow::query()->with(['book', 'user'])
+            ->when($searchQuery, function ($query) use ($searchQuery): void {
+                $query->where(function ($q) use ($searchQuery): void {
+                    $q->whereHas('book', function ($bookQuery) use ($searchQuery): void {
                         $bookQuery->where('title', 'like', "%{$searchQuery}%")
                             ->orWhere('author', 'like', "%{$searchQuery}%");
                     })
-                        ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
+                        ->orWhereHas('user', function ($userQuery) use ($searchQuery): void {
                             $userQuery->where('name', 'like', "%{$searchQuery}%")
                                 ->orWhere('email', 'like', "%{$searchQuery}%");
                         });
                 });
             })
-            ->when($status, function ($query) use ($status) {
+            ->when($status, function ($query) use ($status): void {
                 if ($status === 'returned') {
                     $query->whereNotNull('returned_at');
                 } elseif ($status === 'overdue') {
@@ -45,27 +45,25 @@ class AdminBorrowingController extends Controller
             })
             ->latest()
             ->paginate(10)
-            ->through(function ($borrowing) {
-                return [
-                    'id' => $borrowing->id,
-                    'book' => [
-                        'title' => $borrowing->book->title,
-                        'author' => $borrowing->book->author,
-                        'cover_image_url' => $borrowing->book->cover_image_url,
-                    ],
-                    'user' => [
-                        'name' => $borrowing->user->name,
-                        'email' => $borrowing->user->email,
-                    ],
-                    'borrowed_at' => $borrowing->borrowed_at,
-                    'due_date' => $borrowing->due_date,
-                    'returned_at' => $borrowing->returned_at,
-                    'is_overdue' => $borrowing->isOverdue(),
-                    'status' => $borrowing->returned_at
-                        ? 'returned'
-                        : ($borrowing->isOverdue() ? 'overdue' : 'active'),
-                ];
-            });
+            ->through(fn ($borrowing) => [
+                'id' => $borrowing->id,
+                'book' => [
+                    'title' => $borrowing->book->title ?? 'No title',
+                    'author' => $borrowing->book->author ?? 'No author',
+                    'cover_image_url' => $borrowing->book->cover_image_url ?? 'No image',
+                ],
+                'user' => [
+                    'name' => $borrowing->user->name,
+                    'email' => $borrowing->user->email,
+                ],
+                'borrowed_at' => $borrowing->borrowed_at,
+                'due_date' => $borrowing->due_date,
+                'returned_at' => $borrowing->returned_at,
+                'is_overdue' => $borrowing->isOverdue(),
+                'status' => $borrowing->returned_at
+                    ? 'returned'
+                    : ($borrowing->isOverdue() ? 'overdue' : 'active'),
+            ]);
 
         return Inertia::render('Admin/Borrowings/Index', [
             'borrowings' => $borrowings,
@@ -75,7 +73,7 @@ class AdminBorrowingController extends Controller
 
     public function store(StoreBorrowRequest $request)
     {
-        $borrowing = Borrow::create([
+        $borrowing = Borrow::query()->create([
             'book_id' => $request->book_id,
             'user_id' => $request->user_id,
             'borrowed_at' => $request->borrowed_at ?? now(),
@@ -99,7 +97,7 @@ class AdminBorrowingController extends Controller
 
         return Inertia::render('Admin/Borrowings/Create', [
             'availableBooks' => $availableBooks,
-            'users' => User::all(),
+            'users' => User::query()->all(),
             'filters' => request()->only('search'),
         ]);
     }

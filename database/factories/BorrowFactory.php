@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Book;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Borrow>
  */
-class BorrowFactory extends Factory
+final class BorrowFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -33,7 +35,7 @@ class BorrowFactory extends Factory
         ];
     }
 
-    public function returned(): Factory|BorrowFactory
+    public function returned(): Factory|self
     {
         return $this->state(function (array $attributes) {
             return [
@@ -42,7 +44,7 @@ class BorrowFactory extends Factory
         });
     }
 
-    public function overdue(): Factory|BorrowFactory
+    public function overdue(): Factory|self
     {
         return $this->state(function (array $attributes) {
             return [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO;
 
 use Illuminate\Http\Request;
@@ -7,7 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-readonly class BookCreateDTO
+final readonly class BookCreateDTO
 {
     public function __construct(
         public string $title,
@@ -25,8 +27,8 @@ readonly class BookCreateDTO
     public static function fromRequest(Request $request): self
     {
         return new self(
-            title: $request->string('title'),
-            author: $request->string('author'),
+            title: $request->string('title')->toString(),
+            author: $request->string('author')->toString(),
             publication_year: $request->input('publication_year'),
             description: $request->input('description'),
             genre_id: $request->integer('genre_id'),
@@ -67,6 +69,20 @@ readonly class BookCreateDTO
         ])->validate();
     }
 
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            title: $data['title'],
+            author: $data['author'],
+            publication_year: $data['publication_year'],
+            description: $data['description'] ?? null,
+            genre_id: $data['genre_id'],
+            cover_image: $data['cover_image'] ?? null,
+            ISBN: $data['ISBN'] ?? null,
+            status: $data['status'] ?? 'available'
+        );
+    }
+
     public function generateUniqueIdentifier(): string
     {
         return Str::slug($this->title.'-'.$this->author.'-'.$this->publication_year);
@@ -75,10 +91,10 @@ readonly class BookCreateDTO
     public function sanitize(): self
     {
         return new self(
-            title: trim($this->title),
-            author: trim($this->author),
+            title: mb_trim($this->title),
+            author: mb_trim($this->author),
             publication_year: $this->publication_year,
-            description: $this->description ? trim($this->description) : null,
+            description: $this->description ? mb_trim($this->description) : null,
             genre_id: $this->genre_id,
             cover_image: $this->cover_image,
             ISBN: $this->ISBN ? preg_replace('/[^0-9X]/', '', $this->ISBN) : null,
@@ -101,7 +117,7 @@ readonly class BookCreateDTO
             $this->cover_image->getClientOriginalExtension();
 
         return $basePath
-            ? rtrim($basePath, '/').'/'.$filename
+            ? mb_rtrim($basePath, '/').'/'.$filename
             : $filename;
     }
 
@@ -116,19 +132,5 @@ readonly class BookCreateDTO
             'ISBN' => $this->ISBN,
             'status' => $this->status,
         ];
-    }
-
-    public static function fromArray(array $data): self
-    {
-        return new self(
-            title: $data['title'],
-            author: $data['author'],
-            publication_year: $data['publication_year'],
-            description: $data['description'] ?? null,
-            genre_id: $data['genre_id'],
-            cover_image: $data['cover_image'] ?? null,
-            ISBN: $data['ISBN'] ?? null,
-            status: $data['status'] ?? 'available'
-        );
     }
 }

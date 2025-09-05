@@ -7,7 +7,7 @@ namespace App\States;
 use App\Enum\BookStatus;
 use App\Exceptions\BookNotAvailableException;
 
-class AvailableState extends BookStatusState
+final class AvailableState extends BookStatusState
 {
     public function reserve(): void
     {

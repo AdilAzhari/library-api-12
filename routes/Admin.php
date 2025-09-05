@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Admin\AdminBookController;
 use App\Http\Controllers\Admin\AdminBorrowingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -10,34 +12,33 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Middleware\AdminMiddleware;
 
 Route::prefix('admin')->as('admin.')
-    ->middleware(['auth', 'verified', AdminMiddleware::class])->group(function () {
+    ->middleware(['auth', 'verified', AdminMiddleware::class])->group(function (): void {
 
         Route::controller(ProfileController::class)
             ->prefix('profile')
             ->as('profile.')
-            ->group(function () {
+            ->group(function (): void {
                 Route::get('/edit', 'edit')->name('.edit');
                 Route::put('/', 'update')->name('.update');
                 Route::delete('/', 'destroy')->name('.destroy');
             });
 
         Route::resource('/borrowings', AdminBorrowingController::class)->except(['edit', 'update']);
-        Route::controller(AdminBorrowingController::class)->as('admin.borrowings')
+        Route::controller(AdminBorrowingController::class)
             ->prefix('borrowings/{borrowing}')
-            ->group(function () {
-                Route::put('/return', 'return')->name('.return');
-                Route::put('/renew', 'renew')->name('.renew');
-                Route::put('/return', 'markReturned')->name('.return');
-                Route::put('/renew', 'renew')->name('.renew');
+            ->as('borrowings.')
+            ->group(function (): void {
+                Route::put('/return', 'markReturned')->name('return');
+                Route::put('/renew', 'renew')->name('renew');
             });
 
         Route::controller(AdminReservationController::class)
-            ->as('admin.reservations')
+            ->as('reservations.')
             ->prefix('reservations')
-            ->group(function () {
-                Route::post('/{reservation}/fulfill', 'fulfill')->name('.fulfill');
-                Route::post('/{reservation}/cancel', 'cancel')->name('.cancel');
-                Route::get('/', 'index')->name('.index');
+            ->group(function (): void {
+                Route::get('/', 'index')->name('index');
+                Route::post('/{reservation}/fulfill', 'fulfill')->name('fulfill');
+                Route::post('/{reservation}/cancel', 'cancel')->name('cancel');
             });
         // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -52,12 +53,12 @@ Route::prefix('admin')->as('admin.')
 
         // Reports
         Route::controller(AdminReportController::class)
-            ->as('admin.reports')
+            ->as('reports.')
             ->prefix('reports')
-            ->group(function () {
-                Route::get('/borrowings', 'borrowings')->name('.borrowings');
-                Route::get('/overdue', 'overdue')->name('.overdue');
-                Route::get('/borrowings/export/csv', 'exportBorrowingsCSV')->name('.borrowings.export.csv');
-                Route::get('/borrowings/export/pdf', 'exportBorrowingsPDF')->name('.borrowings.export.pdf');
+            ->group(function (): void {
+                Route::get('/borrowings', 'borrowings')->name('borrowings');
+                Route::get('/overdue', 'overdue')->name('overdue');
+                Route::get('/borrowings/export/csv', 'exportBorrowingsCSV')->name('borrowings.export.csv');
+                Route::get('/borrowings/export/pdf', 'exportBorrowingsPDF')->name('borrowings.export.pdf');
             });
     });

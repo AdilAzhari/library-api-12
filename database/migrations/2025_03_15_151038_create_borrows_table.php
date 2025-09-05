@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -20,7 +22,7 @@ return new class extends Migration
             $table->date('returned_at')->nullable();
             $table->integer('renewal_count')->default(0);
             $table->decimal('late_fee', 8, 2)->nullable()->default(0);
-            $table->enum('status', ['Active', 'Completed', 'Cancelled'])->default('active');
+            $table->enum('status', ['active', 'completed', 'cancelled', 'overdue'])->default('active');
             $table->text('notes')->nullable();
             $table->timestamps();
 

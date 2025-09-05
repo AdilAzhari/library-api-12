@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Book;
@@ -8,7 +10,7 @@ use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ReservationFactory extends Factory
+final class ReservationFactory extends Factory
 {
     protected $model = Reservation::class;
 
@@ -27,7 +29,7 @@ class ReservationFactory extends Factory
         ];
     }
 
-    public function canceled(): ReservationFactory
+    public function canceled(): self
     {
         return $this->state(function (array $attributes) {
             return [
@@ -36,7 +38,7 @@ class ReservationFactory extends Factory
         });
     }
 
-    public function fulfilled(): ReservationFactory
+    public function fulfilled(): self
     {
         return $this->state(function (array $attributes) {
             return [
@@ -48,7 +50,7 @@ class ReservationFactory extends Factory
         });
     }
 
-    public function expired(): ReservationFactory
+    public function expired(): self
     {
         return $this->state(function (array $attributes) {
             return [

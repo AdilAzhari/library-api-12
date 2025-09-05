@@ -37,7 +37,6 @@ import StatsCard from '@/Components/Admin/StatsCard.vue';
 import BorrowingsChart from '@/Components/Admin/Charts/BorrowingsChart.vue';
 import GenresChart from '@/Components/Admin/Charts/GenresChart.vue';
 import ActivityFeed from '@/Components/Admin/ActivityFeed.vue';
-import {onMounted} from 'vue';
 
 defineProps({
     stats: {
@@ -52,8 +51,5 @@ defineProps({
         type: Array,
         required: true
     }
-});
-onMounted(() => {
-    console.log('Charts data:', props.charts);
 });
 </script>

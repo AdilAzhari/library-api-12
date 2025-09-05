@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTO;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
-readonly class BookUpdateDTO
+final readonly class BookUpdateDTO
 {
     public function __construct(
         public string $title,
@@ -26,7 +28,7 @@ readonly class BookUpdateDTO
             author: $request->input('author'),
             publication_year: $request->input('publication_year'),
             description: $request->input('description'),
-            genre_id: $request->input('genre_id'),
+            genre_id: $request->integer('genre_id'),
             cover_image: $request->file('cover_image'),
             isbn: $request->input('ISBN'),
             status: $request->input('status', 'available')
@@ -55,7 +57,7 @@ readonly class BookUpdateDTO
             'description' => $this->description,
             'publication_year' => $this->publication_year,
             'genre_id' => $this->genre_id,
-            'isbn' => $this->isbn,
+            'ISBN' => $this->isbn,
             'status' => $this->status,
         ];
     }
@@ -63,10 +65,10 @@ readonly class BookUpdateDTO
     public function sanitize(): self
     {
         return new self(
-            title: trim($this->title),
-            author: trim($this->author),
+            title: mb_trim($this->title),
+            author: mb_trim($this->author),
             publication_year: $this->publication_year,
-            description: $this->description ? trim($this->description) : null,
+            description: $this->description ? mb_trim($this->description) : null,
             genre_id: $this->genre_id,
             cover_image: $this->cover_image,
             isbn: $this->isbn ? preg_replace('/[^0-9X]/', '', $this->isbn) : null,
@@ -94,7 +96,7 @@ readonly class BookUpdateDTO
             $this->cover_image->getClientOriginalExtension();
 
         return $basePath
-            ? rtrim($basePath, '/').'/'.$filename
+            ? mb_rtrim($basePath, '/').'/'.$filename
             : $filename;
     }
 }

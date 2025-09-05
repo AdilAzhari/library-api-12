@@ -2,10 +2,22 @@
     <AdminLayout>
         <div class="flex items-center justify-between mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Borrowing Management</h1>
-            <Link href="/admin/borrowings/create"
-                  class="bg-[#2c3e50] hover:bg-[#34495e] text-white px-4 py-2 rounded-md text-sm font-medium">
-                Manual Checkout
-            </Link>
+            <div class="flex space-x-2">
+                <Link href="/admin/borrowings/create"
+                      class="bg-[#2c3e50] hover:bg-[#34495e] text-white px-4 py-2 rounded-md text-sm font-medium">
+                    Manual Checkout
+                </Link>
+                <button
+                    @click="exportCSV"
+                    class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md text-sm font-medium border border-gray-300 flex items-center"
+                >
+                    <svg class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export CSV
+                </button>
+            </div>
         </div>
 
         <div class="bg-white shadow rounded-lg overflow-hidden">
@@ -278,5 +290,14 @@ const handleNavigation = async (url) => {
             router.reload({only: ['borrowings']});
         }
     });
+};
+
+const exportCSV = () => {
+    const params = new URLSearchParams({
+        start_date: props.filters.start_date,
+        end_date: props.filters.end_date
+    });
+    console.log('start_Date', props.filters.start_date);
+    window.location.href = route('admin..reports.borrowings.export.csv') + '?' + params.toString();
 };
 </script>

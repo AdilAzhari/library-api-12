@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class StoreBookRequest extends \App\Http\Requests\StoreBookRequest
+final class StoreBookRequest extends \App\Http\Requests\StoreBookRequest
 {
     public function authorize(): bool
     {

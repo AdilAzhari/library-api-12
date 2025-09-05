@@ -31,12 +31,12 @@ Copy
                             <div
                                 class="relative rounded-lg overflow-hidden aspect-[3/4] shadow-md border border-[#e8e3d5]">
                                 <img
-                                    :src="book.cover_image_url"
-                                    :alt="book.title"
+                                    :src="book?.cover_image_url || '/images/book-cover-placeholder.jpg'"
+                                    :alt="book?.title || 'Book cover'"
                                     class="absolute inset-0 w-full h-full object-cover"
                                     @error="handleImageError"
                                 />
-                                <div v-if="!book.cover_image_url"
+                                <div v-if="!book?.cover_image_url"
                                      class="absolute inset-0 bg-gray-100 flex items-center justify-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" fill="none"
                                          viewBox="0 0 24 24" stroke="currentColor">
@@ -46,7 +46,7 @@ Copy
                                 </div>
                                 <div
                                     class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-xs">
-                                    <span class="text-sm font-medium text-[#8b5a2b]">{{ book.publication_year }}</span>
+                                    <span class="text-sm font-medium text-[#8b5a2b]">{{ book?.publication_year || 'N/A' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -59,17 +59,17 @@ Copy
                                 <div class="flex items-start justify-between">
                                     <div>
                                         <h1 class="text-3xl font-serif font-bold text-[#2c3e50] leading-tight">
-                                            {{ book.title }}</h1>
+                                            {{ book?.title || 'Unknown Title' }}</h1>
                                         <p class="mt-2 text-lg text-[#8b5a2b] flex items-center">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8b5a2b] mr-2"
                                                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                             </svg>
-                                            {{ book.author }}
+                                            {{ book?.author || 'Unknown Author' }}
                                         </p>
                                     </div>
-                                    <span v-if="book.status === 'available'"
+                                    <span v-if="book?.status === 'available'"
                                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
                                              viewBox="0 0 24 24" stroke="currentColor">
@@ -80,12 +80,12 @@ Copy
                                     </span>
                                     <span v-else
                                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
-                                        {{ book.status }}
+                                        {{ book?.status || 'Unknown' }}
                                     </span>
                                 </div>
 
                                 <div class="prose max-w-none text-gray-700">
-                                    <p class="text-lg leading-relaxed">{{ book.description }}</p>
+                                    <p class="text-lg leading-relaxed">{{ book?.description || 'No description available.' }}</p>
                                 </div>
 
                                 <!-- Book Metadata -->
@@ -100,7 +100,7 @@ Copy
                                         </div>
                                         <div>
                                             <p class="text-xs text-gray-500">ISBN</p>
-                                            <p class="font-medium">{{ book.ISBN }}</p>
+                                            <p class="font-medium">{{ book?.ISBN || 'N/A' }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center p-3 bg-[#f9f7f2] rounded-lg border border-[#e8e3d5]">
@@ -113,7 +113,7 @@ Copy
                                         </div>
                                         <div>
                                             <p class="text-xs text-gray-500">Genre</p>
-                                            <p class="font-medium">{{ book.genre?.name || 'No genre' }}</p>
+                                            <p class="font-medium">{{ book?.genre?.name || 'No genre' }}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -123,7 +123,7 @@ Copy
                             <div class="space-y-4">
                                 <button
                                     @click="!isReserved ? showReservationModal = true : null"
-                                    :disabled="isReserved || !book.is_available"
+                                    :disabled="isReserved || !book?.is_available"
                                     :class="[
                                         'w-full inline-flex items-center justify-center rounded-xl px-6 py-4 text-base font-medium text-white shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200',
                                         isReserved || !book.is_available
@@ -139,18 +139,18 @@ Copy
                                     {{
                                         isReserved
                                             ? 'Already Reserved'
-                                            : book.is_available
+                                            : book?.is_available
                                                 ? 'Reserve This Book'
                                                 : 'Not Available'
                                     }}
                                 </button>
 
                                 <button
-                                    v-if="book.status === 'available'"
+                                    v-if="book?.is_available"
                                     @click="borrowBook"
-                                    :disabled="!book.is_available || isReserved"
+                                    :disabled="!book?.is_available || isReserved"
                                     :class="['w-full inline-flex items-center justify-center rounded-xl px-6 py-4 text-base font-medium text-white shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200',
-book.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500'
+book?.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:ring-amber-500'
 : 'bg-gray-400 cursor-not-allowed'
 ]"
                                 >
@@ -160,7 +160,7 @@ book.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600
                                               d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                     </svg>
                                     {{
-                                        !book.is_available
+                                        !book?.is_available
                                             ? 'Not Available for Borrowing'
                                             : isReserved
                                                 ? 'Cannot Borrow (Reserved)'
@@ -298,11 +298,11 @@ book.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600
                             </div>
                             <div class="mt-4 p-4">
                                 <h3 class="text-lg font-serif font-medium text-[#2c3e50] line-clamp-1">{{
-                                        book.title
+                                        book?.title || 'Unknown Title'
                                     }}</h3>
-                                <p class="text-sm text-[#8b5a2b] mt-1">{{ book.author }}</p>
+                                <p class="text-sm text-[#8b5a2b] mt-1">{{ book?.author || 'Unknown Author' }}</p>
                                 <Link
-                                    :href="`/books/${book.id}`"
+                                    :href="`/books/${book?.id || 0}`"
                                     class="mt-3 inline-flex items-center text-sm font-medium text-[#2c3e50] hover:text-amber-600 transition-colors duration-200"
                                 >
                                     View Details
@@ -333,7 +333,7 @@ book.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600
                     <h2 class="text-xl font-serif font-medium text-[#2c3e50]">Reserve Book</h2>
                 </div>
                 <p class="mt-2 text-gray-600">
-                    You're about to reserve <span class="font-medium">"{{ book.title }}"</span>. This will hold the book
+                    You're about to reserve <span class="font-medium">"{{ book?.title || 'this book' }}"</span>. This will hold the book
                     for you for 7 days.
                 </p>
                 <div class="mt-6 flex justify-end space-x-3">
@@ -443,7 +443,7 @@ book.is_available && !isReserved ? 'bg-gradient-to-r from-amber-500 to-amber-600
         </Modal>
     </div>
 </template>
-<script setup> import {computed, reactive, ref} from 'vue';
+<script setup> import {computed, reactive, ref, watch} from 'vue';
 import {Link, router, usePage} from '@inertiajs/vue3';
 import AppHeader from '@/Components/AppHeader.vue';
 import Footer from '@/Components/AppFooter.vue'
@@ -460,16 +460,18 @@ const props = defineProps({
 const page = usePage();
 const flash = reactive({success: page.props.flash?.success || null, error: page.props.flash?.error || null});
 const bookCover = computed(() => {
-    return props.book.cover_image_url || '/images/book-cover-placeholder.jpg';
+    return props.book?.cover_image_url || '/images/book-cover-placeholder.jpg';
 });
 const handleImageError = (e) => {
     e.target.src = '/images/book-cover-placeholder.jpg';
 };
 const showReservationModal = ref(false);
 const showReviewModal = ref(false);
+const showAddToListModal = ref(false);
 const hoverRating = ref(0);
+const userReadingLists = ref([]);
 const hasReviewed = computed(() => {
-    return props.book.reviews?.some(review => review.user_id === page.props.auth.user?.id);
+    return props.book?.reviews?.some(review => review.user_id === page.props.auth.user?.id);
 });
 const reviewForm = reactive({rating: 0, comment: ''});
 const formatDate = (dateString) => {
@@ -477,7 +479,7 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
 };
 const reserveBook = () => {
-    router.post(`/books/${props.book.id}/reserve`, {}, {
+    router.post(`/books/${props.book?.id}/reserve`, {}, {
         preserveScroll: true, onSuccess: () => {
             showReservationModal.value = false;
             flash.success = 'Book reserved successfully!';
@@ -490,7 +492,7 @@ const reserveBook = () => {
 };
 const borrowBook = () => {
     if (confirm('Are you sure you want to borrow this book?')) {
-        router.post(`/books/${props.book.id}/borrow`, {}, {
+        router.post(`/books/${props.book?.id}/borrow`, {}, {
             preserveScroll: true, onSuccess: () => {
                 flash.success = 'Book borrowed successfully!';
                 router.reload({only: ['book']});
@@ -510,7 +512,7 @@ const submitReview = () => {
         return;
     }
     const reviewData = {rating: reviewForm.rating, comment: reviewForm.comment.trim()};
-    router.post(`/books/${props.book.id}/reviews`, reviewData, {
+    router.post(`/books/${props.book?.id}/reviews`, reviewData, {
         preserveScroll: true, onSuccess: () => {
             showReviewModal.value = false;
             reviewForm.rating = 0;
@@ -521,8 +523,56 @@ const submitReview = () => {
         }
     });
 };
+
+const fetchUserReadingLists = async () => {
+    try {
+        const response = await fetch('/api/reading-lists/user');
+        const data = await response.json();
+        userReadingLists.value = data.reading_lists || [];
+    } catch (error) {
+        console.error('Failed to fetch reading lists:', error);
+        userReadingLists.value = [];
+    }
+};
+
+const addBookToList = (listId) => {
+    router.post(`/reading-lists/${listId}/books/${props.book?.id}`, {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAddToListModal.value = false;
+            flash.success = 'Book added to reading list successfully!';
+        },
+        onError: (errors) => {
+            flash.error = errors.message || 'Failed to add book to reading list';
+        }
+    });
+};
+
+const shareBook = () => {
+    if (navigator.share) {
+        navigator.share({
+            title: props.book?.title || 'Book',
+            text: `Check out this book: ${props.book?.title || 'Unknown Title'} by ${props.book?.author || 'Unknown Author'}`,
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            flash.success = 'Book link copied to clipboard!';
+        }).catch(() => {
+            flash.error = 'Failed to share book link';
+        });
+    }
+};
+
+// Watch for showAddToListModal changes to fetch reading lists
+watch(showAddToListModal, (newValue) => {
+    if (newValue) {
+        fetchUserReadingLists();
+    }
+});
 const isAvailable = computed(() => {
-    return props.book.status === 'available' && props.book.status !== 'borrowed' && props.book.status !== 'reserved';
+    return props.book?.is_available === true;
 }); </script>
 <style> /* Custom scrollbar to match the theme */
 ::-webkit-scrollbar {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\Borrow;
@@ -8,15 +10,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class OverdueBookNotification extends Notification implements ShouldQueue
+final class OverdueBookNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-
-
-    public function __construct(public Borrow $borrowing)
-    {
-    }
+    public function __construct(public Borrow $borrowing) {}
 
     public function via($notifiable): array
     {
@@ -27,8 +25,8 @@ class OverdueBookNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Overdue Book Notification')
-            ->line('The book "' . $this->borrowing->book->title . '" is overdue.')
-            ->line('Due date: ' . $this->borrowing->due_date->format('F j, Y'))
+            ->line('The book "'.$this->borrowing->book->title.'" is overdue.')
+            ->line('Due date: '.$this->borrowing->due_date->format('F j, Y'))
             ->action('Return Book', url('/borrowings'))
             ->line('Thank you for using our library!');
     }
@@ -36,10 +34,10 @@ class OverdueBookNotification extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-            'message' => 'The book "' . $this->borrowing->book->title . '" is overdue.',
+            'message' => 'The book "'.$this->borrowing->book->title.'" is overdue.',
             'due_date' => $this->borrowing->due_date->format('F j, Y'),
             'book_id' => $this->borrowing->book_id,
-            'borrowing_id' => $this->borrowing->id
+            'borrowing_id' => $this->borrowing->id,
         ];
     }
 }

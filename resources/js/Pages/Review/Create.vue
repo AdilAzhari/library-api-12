@@ -1,5 +1,8 @@
 <template>
-    <div class="container mx-auto p-6">
+    <div class="min-h-screen bg-[#f9f7f2]">
+        <Header/>
+        
+        <main class="container mx-auto px-4 py-8 max-w-4xl">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Submit a Review</h1>
         <form @submit.prevent="submitForm" class="bg-white rounded-lg shadow-md p-6">
             <div class="space-y-4">
@@ -50,12 +53,18 @@
                 </div>
             </div>
         </form>
+        </main>
+        
+        <!-- Footer -->
+        <Footer :year="new Date().getFullYear()" />
     </div>
 </template>
 
 <script setup>
 import {ref} from 'vue';
 import {router} from '@inertiajs/vue3';
+import Header from '@/Components/AppHeader.vue';
+import Footer from '@/Components/AppFooter.vue';
 
 const form = ref({
     book_id: '',

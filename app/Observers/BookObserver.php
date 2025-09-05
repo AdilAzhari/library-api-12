@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Enum\BookStatus;
@@ -8,7 +10,7 @@ use App\Events\BookDeletedPermanently;
 use App\Events\BookUpdated;
 use App\Models\Book;
 
-class BookObserver
+final class BookObserver
 {
     /**
      * Handle the Book "created" event.
@@ -20,11 +22,11 @@ class BookObserver
 
     public function creating(Book $book): void
     {
-        $book->status = $book->status ?? BookStatus::STATUS_AVAILABLE->value;
+        $book->status ??= BookStatus::AVAILABLE->value;
 
         // Ensure new books can't be created as borrowed without a borrow record
-        if ($book->status === BookStatus::STATUS_BORROWED->value && ! $book->borrowings()->exists()) {
-            $book->status = BookStatus::STATUS_AVAILABLE->value;
+        if ($book->status === BookStatus::BORROWED->value && ! $book->borrowings()->exists()) {
+            $book->status = BookStatus::AVAILABLE->value;
         }
     }
 

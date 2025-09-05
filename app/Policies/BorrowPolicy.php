@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Borrow;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class BorrowPolicy
+final class BorrowPolicy
 {
     use HandlesAuthorization;
 

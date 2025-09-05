@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exceptions;
 
 use Exception;
 
-class ReservationExistsException extends Exception
+final class ReservationExistsException extends Exception
 {
     protected $message = 'You already have an active reservation for this book';
 

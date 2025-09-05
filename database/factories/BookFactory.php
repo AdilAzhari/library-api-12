@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Enum\BookStatus;
 use App\Models\Book;
 use App\Models\Genre;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -9,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<Book>
  */
-class BookFactory extends Factory
+final class BookFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -25,21 +28,21 @@ class BookFactory extends Factory
             'description' => $this->faker->paragraph(),
             'genre_id' => Genre::factory(),
             'ISBN' => $this->faker->isbn13,
-            'status' => $this->faker->randomElement(['Available', 'Borrowed', 'Reserved']),
+            'status' => $this->faker->randomElement(BookStatus::values()),
             'average_rating' => $this->faker->randomFloat(1, 1, 5),
         ];
     }
 
-    public function withCoverImage(): BookFactory|Factory
+    public function withCoverImage(): self|Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'cover_image' => 'covers/' . $this->faker->uuid . '.jpg',
+                'cover_image' => 'covers/'.$this->faker->uuid.'.jpg',
             ];
         });
     }
 
-    public function available(): BookFactory|Factory
+    public function available(): self|Factory
     {
         return $this->state(function (array $attributes) {
             return [
@@ -48,7 +51,7 @@ class BookFactory extends Factory
         });
     }
 
-    public function borrowed(): BookFactory|Factory
+    public function borrowed(): self|Factory
     {
         return $this->state(function (array $attributes) {
             return [
@@ -57,7 +60,7 @@ class BookFactory extends Factory
         });
     }
 
-    public function reserved(): BookFactory|Factory
+    public function reserved(): self|Factory
     {
         return $this->state(function (array $attributes) {
             return [

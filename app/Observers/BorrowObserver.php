@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Borrow;
 
-class BorrowObserver
+final class BorrowObserver
 {
     public function saved(Borrow $borrow): void
     {

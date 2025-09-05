@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BookResource extends JsonResource
+final class BookResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,6 +16,8 @@ class BookResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return array_merge(parent::toArray($request), [
+            'cover_image_url' => $this->cover_image_url ?? asset('images/book-cover-placeholder.jpg'),
+        ]);
     }
 }
